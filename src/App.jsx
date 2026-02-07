@@ -25,7 +25,7 @@ import {
 } from 'firebase/firestore';
 import { 
   BookOpen, Trophy, User, LogOut, CheckCircle, Brain, 
-  BarChart3, Mail, Lock, Loader2, AlertCircle, Plus, Trash2, Settings
+  BarChart3, Mail, Lock, Loader2, AlertCircle, Plus, Trash2, Settings, ShieldAlert
 } from 'lucide-react';
 
 // --- Firebase Configuration ---
@@ -43,6 +43,14 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+
+// --- 🔒 管理員設定 (Security Config) ---
+// 請在此輸入允許進入後台的 Email (可以是多個)
+const ADMIN_EMAILS = [
+  "teacher@example.com", 
+  "admin@idiom-master.com",
+  "hs3591@gses.hcc.edu.tw" // <--- 請替換成您自己的 Email
+];
 
 // --- Default Data for Initialization ---
 const INITIAL_IDIOMS = [
@@ -532,7 +540,7 @@ export default function App() {
   const [activeTab, setActiveTab] = useState('learn');
   const [initLoading, setInitLoading] = useState(true);
   const [userStats, setUserStats] = useState({ learnedCount: 0, totalScore: 0 });
-  const [idioms, setIdioms] = useState([]); // Cloud Data State
+  const [idioms, setIdioms] = useState([]); 
 
   useEffect(() => {
     const initAuth = async () => {
@@ -546,7 +554,6 @@ export default function App() {
       setInitLoading(false);
       if (currentUser) fetchUserStats(currentUser.uid);
     });
-    // Fetch Idioms on Load
     fetchIdioms();
     return () => unsubscribe();
   }, []);
@@ -569,6 +576,9 @@ export default function App() {
   };
 
   const handleLogout = async () => { await signOut(auth); };
+
+  // 🔒 Admin Check Logic
+  const isAdmin = user && user.email && ADMIN_EMAILS.includes(user.email);
 
   if (initLoading) return <div className="min-h-screen flex items-center justify-center bg-gray-50 text-gray-400">載入中...</div>;
   if (!user) return <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-purple-50 p-4 font-sans"><AuthScreen onLogin={()=>{}} /></div>;
@@ -595,7 +605,19 @@ export default function App() {
         {activeTab === 'learn' && <div className="animate-fade-in"><LearningMode user={user} idioms={idioms} userStats={userStats} refreshStats={() => fetchUserStats(user.uid)} /></div>}
         {activeTab === 'quiz' && <div className="animate-fade-in"><QuizMode user={user} idioms={idioms} refreshStats={() => fetchUserStats(user.uid)} /></div>}
         {activeTab === 'leaderboard' && <div className="grid grid-cols-1 md:grid-cols-2 gap-6 animate-fade-in"><Leaderboard user={user} /><div className="bg-white p-6 rounded-2xl shadow-lg h-fit"><h3 className="text-xl font-bold mb-4">個人戰績</h3><p className="text-gray-600">已學成語: <span className="font-bold text-2xl text-gray-800">{userStats.learnedCount || 0}</span></p><p className="text-gray-600">累積積分: <span className="font-bold text-2xl text-indigo-600">{userStats.totalScore || 0}</span></p></div></div>}
-        {activeTab === 'admin' && <div className="animate-fade-in"><AdminPanel idioms={idioms} refreshIdioms={fetchIdioms} /></div>}
+        {activeTab === 'admin' && (
+          <div className="animate-fade-in">
+            {isAdmin ? (
+              <AdminPanel idioms={idioms} refreshIdioms={fetchIdioms} />
+            ) : (
+              <div className="bg-red-50 p-8 rounded-2xl text-center border border-red-100">
+                 <ShieldAlert className="w-16 h-16 text-red-500 mx-auto mb-4" />
+                 <h2 className="text-2xl font-bold text-red-800 mb-2">權限不足</h2>
+                 <p className="text-red-600">此區域僅限管理員進入。</p>
+              </div>
+            )}
+          </div>
+        )}
       </main>
 
       <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 pb-safe z-50">
@@ -603,7 +625,11 @@ export default function App() {
           <button onClick={() => setActiveTab('learn')} className={`flex flex-col items-center p-2 w-20 ${activeTab === 'learn' ? 'text-indigo-600' : 'text-gray-400'}`}><BookOpen size={24} /><span className="text-xs font-bold mt-1">學習</span></button>
           <button onClick={() => setActiveTab('quiz')} className={`flex flex-col items-center p-2 w-20 ${activeTab === 'quiz' ? 'text-indigo-600' : 'text-gray-400'}`}><Brain size={24} /><span className="text-xs font-bold mt-1">測驗</span></button>
           <button onClick={() => setActiveTab('leaderboard')} className={`flex flex-col items-center p-2 w-20 ${activeTab === 'leaderboard' ? 'text-indigo-600' : 'text-gray-400'}`}><BarChart3 size={24} /><span className="text-xs font-bold mt-1">榜單</span></button>
-          <button onClick={() => setActiveTab('admin')} className={`flex flex-col items-center p-2 w-20 ${activeTab === 'admin' ? 'text-orange-600' : 'text-gray-400'}`}><Settings size={24} /><span className="text-xs font-bold mt-1">後台</span></button>
+          
+          {/* 只有管理員才看得到後台按鈕 */}
+          {isAdmin && (
+            <button onClick={() => setActiveTab('admin')} className={`flex flex-col items-center p-2 w-20 ${activeTab === 'admin' ? 'text-orange-600' : 'text-gray-400'}`}><Settings size={24} /><span className="text-xs font-bold mt-1">後台</span></button>
+          )}
         </div>
       </nav>
     </div>
