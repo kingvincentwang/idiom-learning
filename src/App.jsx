@@ -25,7 +25,7 @@ import {
 } from 'firebase/firestore';
 import { 
   BookOpen, Trophy, User, LogOut, CheckCircle, Brain, 
-  BarChart3, Mail, Lock, Loader2, AlertCircle, Plus, Trash2, Settings, ShieldAlert
+  BarChart3, Mail, Lock, Loader2, AlertCircle, Plus, Trash2, Settings, ShieldAlert, FileJson
 } from 'lucide-react';
 
 // --- Firebase Configuration ---
@@ -159,6 +159,8 @@ const AuthScreen = ({ onLogin }) => {
 const AdminPanel = ({ idioms, refreshIdioms }) => {
   const [newIdiom, setNewIdiom] = useState({ word: '', pinyin: '', meaning: '', example: '', option1: '', option2: '', option3: '' });
   const [loading, setLoading] = useState(false);
+  const [jsonMode, setJsonMode] = useState(false);
+  const [jsonInput, setJsonInput] = useState('');
 
   const initData = async () => {
     if (!confirm('確定要匯入預設的 8 個成語嗎？')) return;
@@ -204,6 +206,52 @@ const AdminPanel = ({ idioms, refreshIdioms }) => {
     }
   };
 
+  const handleBulkImport = async () => {
+    if (!jsonInput.trim()) return;
+    setLoading(true);
+    try {
+      const data = JSON.parse(jsonInput);
+      if (!Array.isArray(data)) throw new Error("JSON 格式錯誤：必須是陣列 (Array)");
+
+      let count = 0;
+      for (const item of data) {
+        if (!item.word || !item.meaning) continue;
+
+        // Smart options generation: 
+        // 1. Use 'options' if provided (expected array of 4)
+        // 2. Or generate from 'distractors' array + correct word
+        let finalOptions = item.options;
+        if (!finalOptions && Array.isArray(item.distractors)) {
+          finalOptions = [item.word, ...item.distractors].sort(() => Math.random() - 0.5);
+        }
+
+        if (!finalOptions || finalOptions.length < 4) {
+           console.warn(`跳過 ${item.word}: 選項不足`);
+           continue;
+        }
+
+        await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'idioms'), {
+          word: item.word,
+          pinyin: item.pinyin || '',
+          meaning: item.meaning,
+          example: item.example || '',
+          options: finalOptions,
+          createdAt: serverTimestamp()
+        });
+        count++;
+      }
+      
+      refreshIdioms();
+      setJsonInput('');
+      setJsonMode(false);
+      alert(`成功匯入 ${count} 筆成語！`);
+    } catch (e) {
+      alert('匯入失敗：' + e.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleDelete = async (id) => {
     if (!confirm('確定要刪除這個成語嗎？')) return;
     try {
@@ -226,25 +274,63 @@ const AdminPanel = ({ idioms, refreshIdioms }) => {
           </button>
         )}
       </div>
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        <div className="bg-gray-50 p-4 rounded-xl h-fit">
-          <h4 className="font-bold text-gray-700 mb-4 flex items-center gap-2"><Plus size={18}/> 新增成語</h4>
-          <form onSubmit={handleAdd} className="space-y-3">
-            <input placeholder="成語 (例如：半途而廢)" value={newIdiom.word} onChange={e=>setNewIdiom({...newIdiom, word: e.target.value})} className="w-full p-2 border rounded" required />
-            <input placeholder="拼音 (例如：bàn tú ér fèi)" value={newIdiom.pinyin} onChange={e=>setNewIdiom({...newIdiom, pinyin: e.target.value})} className="w-full p-2 border rounded" required />
-            <textarea placeholder="釋義" value={newIdiom.meaning} onChange={e=>setNewIdiom({...newIdiom, meaning: e.target.value})} className="w-full p-2 border rounded" required />
-            <textarea placeholder="例句" value={newIdiom.example} onChange={e=>setNewIdiom({...newIdiom, example: e.target.value})} className="w-full p-2 border rounded" required />
-            <div className="bg-white p-3 rounded border border-gray-200">
-              <p className="text-xs text-gray-500 mb-2 font-bold">干擾選項 (錯誤答案)：</p>
-              <input placeholder="錯誤選項 1" value={newIdiom.option1} onChange={e=>setNewIdiom({...newIdiom, option1: e.target.value})} className="w-full p-2 border rounded mb-2 text-sm" required />
-              <input placeholder="錯誤選項 2" value={newIdiom.option2} onChange={e=>setNewIdiom({...newIdiom, option2: e.target.value})} className="w-full p-2 border rounded mb-2 text-sm" required />
-              <input placeholder="錯誤選項 3" value={newIdiom.option3} onChange={e=>setNewIdiom({...newIdiom, option3: e.target.value})} className="w-full p-2 border rounded text-sm" required />
+        <div className="space-y-6">
+           {/* Mode Toggle */}
+           <div className="flex gap-2">
+              <button 
+                onClick={() => setJsonMode(false)}
+                className={`flex-1 py-2 rounded-lg font-bold text-sm ${!jsonMode ? 'bg-indigo-600 text-white' : 'bg-gray-200 text-gray-600'}`}
+              >
+                <Plus size={16} className="inline mr-1" /> 單筆新增
+              </button>
+              <button 
+                onClick={() => setJsonMode(true)}
+                className={`flex-1 py-2 rounded-lg font-bold text-sm ${jsonMode ? 'bg-indigo-600 text-white' : 'bg-gray-200 text-gray-600'}`}
+              >
+                <FileJson size={16} className="inline mr-1" /> JSON 整批匯入
+              </button>
+           </div>
+
+          {jsonMode ? (
+            <div className="bg-gray-50 p-4 rounded-xl h-fit">
+               <h4 className="font-bold text-gray-700 mb-2">貼上 JSON 資料</h4>
+               <p className="text-xs text-gray-500 mb-2">
+                 格式：<code>[&#123; "word": "成語", "meaning": "解釋", "distractors": ["錯1", "錯2", "錯3"] &#125;, ...]</code>
+               </p>
+               <textarea 
+                 value={jsonInput}
+                 onChange={(e) => setJsonInput(e.target.value)}
+                 className="w-full h-64 p-3 border rounded font-mono text-xs"
+                 placeholder={`[\n  {\n    "word": "半途而廢",\n    "pinyin": "bàn tú ér fèi",\n    "meaning": "比喻做事有始無終",\n    "example": "例句...",\n    "distractors": ["堅持到底", "持之以恆", "廢寢忘食"]\n  }\n]`}
+               />
+               <button onClick={handleBulkImport} disabled={loading} className="w-full mt-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 rounded">
+                 {loading ? '匯入中...' : '開始匯入'}
+               </button>
             </div>
-            <button type="submit" disabled={loading} className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 rounded">
-              {loading ? '儲存中...' : '新增成語'}
-            </button>
-          </form>
+          ) : (
+            <div className="bg-gray-50 p-4 rounded-xl h-fit">
+              <h4 className="font-bold text-gray-700 mb-4 flex items-center gap-2">新增單筆成語</h4>
+              <form onSubmit={handleAdd} className="space-y-3">
+                <input placeholder="成語 (例如：半途而廢)" value={newIdiom.word} onChange={e=>setNewIdiom({...newIdiom, word: e.target.value})} className="w-full p-2 border rounded" required />
+                <input placeholder="拼音 (例如：bàn tú ér fèi)" value={newIdiom.pinyin} onChange={e=>setNewIdiom({...newIdiom, pinyin: e.target.value})} className="w-full p-2 border rounded" required />
+                <textarea placeholder="釋義" value={newIdiom.meaning} onChange={e=>setNewIdiom({...newIdiom, meaning: e.target.value})} className="w-full p-2 border rounded" required />
+                <textarea placeholder="例句" value={newIdiom.example} onChange={e=>setNewIdiom({...newIdiom, example: e.target.value})} className="w-full p-2 border rounded" required />
+                <div className="bg-white p-3 rounded border border-gray-200">
+                  <p className="text-xs text-gray-500 mb-2 font-bold">干擾選項 (錯誤答案)：</p>
+                  <input placeholder="錯誤選項 1" value={newIdiom.option1} onChange={e=>setNewIdiom({...newIdiom, option1: e.target.value})} className="w-full p-2 border rounded mb-2 text-sm" required />
+                  <input placeholder="錯誤選項 2" value={newIdiom.option2} onChange={e=>setNewIdiom({...newIdiom, option2: e.target.value})} className="w-full p-2 border rounded mb-2 text-sm" required />
+                  <input placeholder="錯誤選項 3" value={newIdiom.option3} onChange={e=>setNewIdiom({...newIdiom, option3: e.target.value})} className="w-full p-2 border rounded text-sm" required />
+                </div>
+                <button type="submit" disabled={loading} className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 rounded">
+                  {loading ? '儲存中...' : '新增成語'}
+                </button>
+              </form>
+            </div>
+          )}
         </div>
+
         <div>
           <h4 className="font-bold text-gray-700 mb-4">目前題庫 ({idioms.length})</h4>
           <div className="space-y-2 max-h-[600px] overflow-y-auto pr-2">
