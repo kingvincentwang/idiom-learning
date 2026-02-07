@@ -66,7 +66,57 @@ const INITIAL_IDIOMS = [
 
 // --- Components ---
 
-// 1. Auth Component
+// 0. Leaderboard (Moved to top for reuse)
+const Leaderboard = ({ user, limit = 5, compact = false }) => {
+  const [leaders, setLeaders] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchLeaders = async () => {
+      try {
+        const querySnapshot = await getDocs(collection(db, 'artifacts', appId, 'public', 'data', 'user_stats'));
+        const users = [];
+        querySnapshot.forEach((doc) => users.push(doc.data()));
+        users.sort((a, b) => (b.totalScore || 0) - (a.totalScore || 0));
+        setLeaders(users.slice(0, limit));
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchLeaders();
+  }, [limit]);
+
+  return (
+    <div className={`bg-white ${compact ? 'p-0 bg-transparent' : 'p-6 rounded-2xl shadow-lg'} w-full`}>
+      {!compact && (
+        <div className="flex items-center gap-2 mb-4 border-b pb-4">
+          <Trophy className="text-yellow-500" /> <h3 className="text-xl font-bold text-gray-800">狀元排行榜</h3>
+        </div>
+      )}
+      
+      {loading ? (
+        <div className="text-center text-gray-400 py-4">讀取中...</div>
+      ) : (
+        <div className="space-y-3">
+          {leaders.map((leader, index) => (
+            <div key={index} className={`flex items-center p-3 rounded-lg ${user && leader.uid === user.uid ? 'bg-indigo-50 border border-indigo-200' : 'bg-gray-50'}`}>
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm mr-3 ${index<3 ? 'bg-yellow-100 text-yellow-800' : 'bg-gray-200'}`}>{index + 1}</div>
+              <div className="flex-1">
+                <p className="font-bold text-gray-800 text-sm">{leader.displayName}</p>
+              </div>
+              <div className="font-mono font-bold text-indigo-600 text-sm">{leader.totalScore} 分</div>
+            </div>
+          ))}
+          {leaders.length === 0 && <p className="text-gray-400 text-center py-4 text-sm">暫無排名</p>}
+        </div>
+      )}
+    </div>
+  );
+};
+
+// 1. Auth Component (Modified with Public Leaderboard)
 const AuthScreen = ({ onLogin }) => {
   const [isRegister, setIsRegister] = useState(false);
   const [email, setEmail] = useState('');
@@ -111,8 +161,10 @@ const AuthScreen = ({ onLogin }) => {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-[70vh] p-6 max-w-md mx-auto mt-10">
-      <div className="bg-white p-8 rounded-2xl shadow-xl w-full">
+    <div className="min-h-screen flex flex-col md:flex-row items-center justify-center p-4 gap-6 max-w-6xl mx-auto">
+      
+      {/* Login Section */}
+      <div className="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md order-1">
         <div className="flex justify-center mb-6">
           <div className="bg-indigo-100 p-4 rounded-full">
             <BookOpen className="w-10 h-10 text-indigo-600" />
@@ -120,12 +172,14 @@ const AuthScreen = ({ onLogin }) => {
         </div>
         <h2 className="text-3xl font-bold text-gray-800 mb-2 text-center">成語狀元榜</h2>
         <p className="text-gray-500 mb-8 text-center">{isRegister ? "建立您的學習帳號" : "登入以繼續學習"}</p>
+        
         {error && (
           <div className="bg-red-50 border border-red-100 text-red-600 p-3 rounded-lg mb-4 text-sm flex items-start gap-2">
             <AlertCircle size={18} className="mt-0.5 shrink-0" />
             <span>{error}</span>
           </div>
         )}
+        
         <form onSubmit={handleAuth} className="space-y-4">
           {isRegister && (
             <div>
@@ -151,6 +205,21 @@ const AuthScreen = ({ onLogin }) => {
           </button>
         </div>
       </div>
+
+      {/* Public Leaderboard Section (Top 10) */}
+      <div className="w-full max-w-sm order-2 md:order-2">
+        <div className="bg-white/80 backdrop-blur-md p-6 rounded-2xl shadow-xl border border-white/50 h-full max-h-[600px] overflow-y-auto">
+           <div className="flex items-center gap-2 mb-4 border-b border-gray-200/50 pb-4">
+              <Trophy className="text-yellow-500 w-6 h-6" /> 
+              <div>
+                <h3 className="text-xl font-bold text-gray-800">目前戰況</h3>
+                <p className="text-xs text-gray-500">前 10 名狀元</p>
+              </div>
+           </div>
+           <Leaderboard user={null} limit={10} compact={true} />
+        </div>
+      </div>
+
     </div>
   );
 };
@@ -216,19 +285,11 @@ const AdminPanel = ({ idioms, refreshIdioms }) => {
       let count = 0;
       for (const item of data) {
         if (!item.word || !item.meaning) continue;
-
-        // Smart options generation: 
-        // 1. Use 'options' if provided (expected array of 4)
-        // 2. Or generate from 'distractors' array + correct word
         let finalOptions = item.options;
         if (!finalOptions && Array.isArray(item.distractors)) {
           finalOptions = [item.word, ...item.distractors].sort(() => Math.random() - 0.5);
         }
-
-        if (!finalOptions || finalOptions.length < 4) {
-           console.warn(`跳過 ${item.word}: 選項不足`);
-           continue;
-        }
+        if (!finalOptions || finalOptions.length < 4) continue;
 
         await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'idioms'), {
           word: item.word,
@@ -240,7 +301,6 @@ const AdminPanel = ({ idioms, refreshIdioms }) => {
         });
         count++;
       }
-      
       refreshIdioms();
       setJsonInput('');
       setJsonMode(false);
@@ -277,34 +337,21 @@ const AdminPanel = ({ idioms, refreshIdioms }) => {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         <div className="space-y-6">
-           {/* Mode Toggle */}
            <div className="flex gap-2">
-              <button 
-                onClick={() => setJsonMode(false)}
-                className={`flex-1 py-2 rounded-lg font-bold text-sm ${!jsonMode ? 'bg-indigo-600 text-white' : 'bg-gray-200 text-gray-600'}`}
-              >
+              <button onClick={() => setJsonMode(false)} className={`flex-1 py-2 rounded-lg font-bold text-sm ${!jsonMode ? 'bg-indigo-600 text-white' : 'bg-gray-200 text-gray-600'}`}>
                 <Plus size={16} className="inline mr-1" /> 單筆新增
               </button>
-              <button 
-                onClick={() => setJsonMode(true)}
-                className={`flex-1 py-2 rounded-lg font-bold text-sm ${jsonMode ? 'bg-indigo-600 text-white' : 'bg-gray-200 text-gray-600'}`}
-              >
+              <button onClick={() => setJsonMode(true)} className={`flex-1 py-2 rounded-lg font-bold text-sm ${jsonMode ? 'bg-indigo-600 text-white' : 'bg-gray-200 text-gray-600'}`}>
                 <FileJson size={16} className="inline mr-1" /> JSON 整批匯入
               </button>
            </div>
-
           {jsonMode ? (
             <div className="bg-gray-50 p-4 rounded-xl h-fit">
                <h4 className="font-bold text-gray-700 mb-2">貼上 JSON 資料</h4>
                <p className="text-xs text-gray-500 mb-2">
                  格式：<code>[&#123; "word": "成語", "meaning": "解釋", "distractors": ["錯1", "錯2", "錯3"] &#125;, ...]</code>
                </p>
-               <textarea 
-                 value={jsonInput}
-                 onChange={(e) => setJsonInput(e.target.value)}
-                 className="w-full h-64 p-3 border rounded font-mono text-xs"
-                 placeholder={`[\n  {\n    "word": "半途而廢",\n    "pinyin": "bàn tú ér fèi",\n    "meaning": "比喻做事有始無終",\n    "example": "例句...",\n    "distractors": ["堅持到底", "持之以恆", "廢寢忘食"]\n  }\n]`}
-               />
+               <textarea value={jsonInput} onChange={(e) => setJsonInput(e.target.value)} className="w-full h-64 p-3 border rounded font-mono text-xs" placeholder={`[\n  {\n    "word": "半途而廢",\n    ... \n  }\n]`} />
                <button onClick={handleBulkImport} disabled={loading} className="w-full mt-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 rounded">
                  {loading ? '匯入中...' : '開始匯入'}
                </button>
@@ -313,12 +360,12 @@ const AdminPanel = ({ idioms, refreshIdioms }) => {
             <div className="bg-gray-50 p-4 rounded-xl h-fit">
               <h4 className="font-bold text-gray-700 mb-4 flex items-center gap-2">新增單筆成語</h4>
               <form onSubmit={handleAdd} className="space-y-3">
-                <input placeholder="成語 (例如：半途而廢)" value={newIdiom.word} onChange={e=>setNewIdiom({...newIdiom, word: e.target.value})} className="w-full p-2 border rounded" required />
-                <input placeholder="拼音 (例如：bàn tú ér fèi)" value={newIdiom.pinyin} onChange={e=>setNewIdiom({...newIdiom, pinyin: e.target.value})} className="w-full p-2 border rounded" required />
+                <input placeholder="成語" value={newIdiom.word} onChange={e=>setNewIdiom({...newIdiom, word: e.target.value})} className="w-full p-2 border rounded" required />
+                <input placeholder="拼音" value={newIdiom.pinyin} onChange={e=>setNewIdiom({...newIdiom, pinyin: e.target.value})} className="w-full p-2 border rounded" required />
                 <textarea placeholder="釋義" value={newIdiom.meaning} onChange={e=>setNewIdiom({...newIdiom, meaning: e.target.value})} className="w-full p-2 border rounded" required />
                 <textarea placeholder="例句" value={newIdiom.example} onChange={e=>setNewIdiom({...newIdiom, example: e.target.value})} className="w-full p-2 border rounded" required />
                 <div className="bg-white p-3 rounded border border-gray-200">
-                  <p className="text-xs text-gray-500 mb-2 font-bold">干擾選項 (錯誤答案)：</p>
+                  <p className="text-xs text-gray-500 mb-2 font-bold">干擾選項：</p>
                   <input placeholder="錯誤選項 1" value={newIdiom.option1} onChange={e=>setNewIdiom({...newIdiom, option1: e.target.value})} className="w-full p-2 border rounded mb-2 text-sm" required />
                   <input placeholder="錯誤選項 2" value={newIdiom.option2} onChange={e=>setNewIdiom({...newIdiom, option2: e.target.value})} className="w-full p-2 border rounded mb-2 text-sm" required />
                   <input placeholder="錯誤選項 3" value={newIdiom.option3} onChange={e=>setNewIdiom({...newIdiom, option3: e.target.value})} className="w-full p-2 border rounded text-sm" required />
@@ -330,7 +377,6 @@ const AdminPanel = ({ idioms, refreshIdioms }) => {
             </div>
           )}
         </div>
-
         <div>
           <h4 className="font-bold text-gray-700 mb-4">目前題庫 ({idioms.length})</h4>
           <div className="space-y-2 max-h-[600px] overflow-y-auto pr-2">
@@ -358,7 +404,6 @@ const LearningMode = ({ user, idioms, refreshStats }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [learnedIds, setLearnedIds] = useState(new Set());
   
-  // FIX: useEffect is declared BEFORE any return statement
   useEffect(() => {
     if (!user) return;
     const fetchLearned = async () => {
@@ -371,7 +416,6 @@ const LearningMode = ({ user, idioms, refreshStats }) => {
     fetchLearned();
   }, [user]);
 
-  // Safe to return now that hooks are declared
   if (!idioms || idioms.length === 0) {
     return (
       <div className="bg-white p-10 rounded-2xl shadow-lg text-center">
@@ -383,7 +427,6 @@ const LearningMode = ({ user, idioms, refreshStats }) => {
   }
 
   const currentIdiom = idioms[currentIndex];
-  // Guard against array index out of bounds
   if (!currentIdiom) return null;
 
   const markAsLearned = async () => {
@@ -570,42 +613,6 @@ const QuizMode = ({ user, idioms, refreshStats }) => {
   );
 };
 
-// 5. Leaderboard
-const Leaderboard = ({ user }) => {
-  const [leaders, setLeaders] = useState([]);
-  useEffect(() => {
-    const fetchLeaders = async () => {
-      try {
-        const querySnapshot = await getDocs(collection(db, 'artifacts', appId, 'public', 'data', 'user_stats'));
-        const users = [];
-        querySnapshot.forEach((doc) => users.push(doc.data()));
-        users.sort((a, b) => (b.totalScore || 0) - (a.totalScore || 0));
-        setLeaders(users.slice(0, 5));
-      } catch (err) {}
-    };
-    fetchLeaders();
-  }, []);
-
-  return (
-    <div className="bg-white p-6 rounded-2xl shadow-lg max-w-md mx-auto">
-      <div className="flex items-center gap-2 mb-6 border-b pb-4">
-        <Trophy className="text-yellow-500" /> <h3 className="text-xl font-bold text-gray-800">狀元排行榜</h3>
-      </div>
-      <div className="space-y-4">
-        {leaders.map((leader, index) => (
-          <div key={index} className={`flex items-center p-3 rounded-lg ${leader.uid === user?.uid ? 'bg-indigo-50 border border-indigo-200' : 'bg-gray-50'}`}>
-            <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm mr-3 ${index<3 ? 'bg-yellow-100 text-yellow-800' : 'bg-gray-200'}`}>{index + 1}</div>
-            <div className="flex-1">
-              <p className="font-bold text-gray-800">{leader.displayName}</p>
-            </div>
-            <div className="font-mono font-bold text-indigo-600">{leader.totalScore} 分</div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-};
-
 // --- Main App ---
 export default function App() {
   const [user, setUser] = useState(null);
@@ -626,7 +633,6 @@ export default function App() {
       setInitLoading(false);
       if (currentUser) fetchUserStats(currentUser.uid);
     });
-    // Call fetchIdioms here is safe because this useEffect runs only ONCE on mount
     fetchIdioms();
     return () => unsubscribe();
   }, []);
@@ -675,7 +681,7 @@ export default function App() {
       <main className="max-w-4xl mx-auto px-4 py-6">
         {activeTab === 'learn' && <div className="animate-fade-in"><LearningMode user={user} idioms={idioms} userStats={userStats} refreshStats={() => fetchUserStats(user.uid)} /></div>}
         {activeTab === 'quiz' && <div className="animate-fade-in"><QuizMode user={user} idioms={idioms} refreshStats={() => fetchUserStats(user.uid)} /></div>}
-        {activeTab === 'leaderboard' && <div className="grid grid-cols-1 md:grid-cols-2 gap-6 animate-fade-in"><Leaderboard user={user} /><div className="bg-white p-6 rounded-2xl shadow-lg h-fit"><h3 className="text-xl font-bold mb-4">個人戰績</h3><p className="text-gray-600">已學成語: <span className="font-bold text-2xl text-gray-800">{userStats.learnedCount || 0}</span></p><p className="text-gray-600">累積積分: <span className="font-bold text-2xl text-indigo-600">{userStats.totalScore || 0}</span></p></div></div>}
+        {activeTab === 'leaderboard' && <div className="grid grid-cols-1 md:grid-cols-2 gap-6 animate-fade-in"><Leaderboard user={user} limit={10} /><div className="bg-white p-6 rounded-2xl shadow-lg h-fit"><h3 className="text-xl font-bold mb-4">個人戰績</h3><p className="text-gray-600">已學成語: <span className="font-bold text-2xl text-gray-800">{userStats.learnedCount || 0}</span></p><p className="text-gray-600">累積積分: <span className="font-bold text-2xl text-indigo-600">{userStats.totalScore || 0}</span></p></div></div>}
         {activeTab === 'admin' && (
           <div className="animate-fade-in">
             {isAdmin ? (
