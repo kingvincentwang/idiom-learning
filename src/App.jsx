@@ -66,19 +66,21 @@ const INITIAL_IDIOMS = [
 
 // --- Components ---
 
-// 0. Leaderboard (Moved to top for reuse)
+// 0. Leaderboard (Updated with Dual Modes)
 const Leaderboard = ({ user, limit = 5, compact = false }) => {
+  const [allData, setAllData] = useState([]);
   const [leaders, setLeaders] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [sortBy, setSortBy] = useState('score'); // 'score' | 'learned'
 
+  // 1. Fetch Data Once
   useEffect(() => {
     const fetchLeaders = async () => {
       try {
         const querySnapshot = await getDocs(collection(db, 'artifacts', appId, 'public', 'data', 'user_stats'));
         const users = [];
         querySnapshot.forEach((doc) => users.push(doc.data()));
-        users.sort((a, b) => (b.totalScore || 0) - (a.totalScore || 0));
-        setLeaders(users.slice(0, limit));
+        setAllData(users);
       } catch (err) {
         console.error(err);
       } finally {
@@ -86,27 +88,79 @@ const Leaderboard = ({ user, limit = 5, compact = false }) => {
       }
     };
     fetchLeaders();
-  }, [limit]);
+  }, []);
+
+  // 2. Sort Data Locally when toggle changes
+  useEffect(() => {
+    if (allData.length === 0) {
+      setLeaders([]);
+      return;
+    }
+    const sorted = [...allData].sort((a, b) => {
+      if (sortBy === 'score') return (b.totalScore || 0) - (a.totalScore || 0);
+      return (b.learnedCount || 0) - (a.learnedCount || 0);
+    });
+    setLeaders(sorted.slice(0, limit));
+  }, [allData, sortBy, limit]);
 
   return (
-    <div className={`bg-white ${compact ? 'p-0 bg-transparent' : 'p-6 rounded-2xl shadow-lg'} w-full`}>
-      {!compact && (
-        <div className="flex items-center gap-2 mb-4 border-b pb-4">
-          <Trophy className="text-yellow-500" /> <h3 className="text-xl font-bold text-gray-800">狀元排行榜</h3>
+    <div className={`bg-white ${compact ? 'p-0 bg-transparent' : 'p-6 rounded-2xl shadow-lg'} w-full transition-all duration-300`}>
+      <div className="flex flex-col gap-4 mb-4 border-b border-gray-200/50 pb-4">
+        {!compact && (
+          <div className="flex items-center gap-2">
+            <Trophy className="text-yellow-500" /> <h3 className="text-xl font-bold text-gray-800">狀元排行榜</h3>
+          </div>
+        )}
+        {compact && (
+           <div className="flex items-center gap-2">
+              <Trophy className="text-yellow-500 w-6 h-6" /> 
+              <div>
+                <h3 className="text-xl font-bold text-gray-800">目前戰況</h3>
+                <p className="text-xs text-gray-500">前 {limit} 名英雄榜</p>
+              </div>
+           </div>
+        )}
+        
+        {/* Toggle Switch */}
+        <div className="flex bg-gray-100 p-1 rounded-lg">
+          <button 
+            onClick={() => setSortBy('score')}
+            className={`flex-1 py-1.5 px-3 rounded-md text-xs font-bold transition-all duration-200 ${sortBy === 'score' ? 'bg-white text-indigo-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+          >
+            測驗積分
+          </button>
+          <button 
+            onClick={() => setSortBy('learned')}
+            className={`flex-1 py-1.5 px-3 rounded-md text-xs font-bold transition-all duration-200 ${sortBy === 'learned' ? 'bg-white text-emerald-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+          >
+            勤學進度
+          </button>
         </div>
-      )}
+      </div>
       
       {loading ? (
         <div className="text-center text-gray-400 py-4">讀取中...</div>
       ) : (
         <div className="space-y-3">
           {leaders.map((leader, index) => (
-            <div key={index} className={`flex items-center p-3 rounded-lg ${user && leader.uid === user.uid ? 'bg-indigo-50 border border-indigo-200' : 'bg-gray-50'}`}>
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm mr-3 ${index<3 ? 'bg-yellow-100 text-yellow-800' : 'bg-gray-200'}`}>{index + 1}</div>
-              <div className="flex-1">
-                <p className="font-bold text-gray-800 text-sm">{leader.displayName}</p>
+            <div key={index} className={`flex items-center p-3 rounded-lg transition-colors ${user && leader.uid === user.uid ? 'bg-indigo-50 border border-indigo-200' : 'bg-gray-50 hover:bg-gray-100'}`}>
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm mr-3 
+                ${index === 0 ? 'bg-yellow-400 text-yellow-900' : 
+                  index === 1 ? 'bg-gray-300 text-gray-800' :
+                  index === 2 ? 'bg-orange-300 text-orange-900' : 'bg-gray-200 text-gray-600'}
+              `}>
+                {index + 1}
               </div>
-              <div className="font-mono font-bold text-indigo-600 text-sm">{leader.totalScore} 分</div>
+              <div className="flex-1 min-w-0">
+                <p className="font-bold text-gray-800 text-sm truncate">{leader.displayName || '無名氏'}</p>
+                {/* 顯示詳細數據作為副標題 (選填) */}
+                <p className="text-[10px] text-gray-400 truncate">
+                  {sortBy === 'score' ? `已學 ${leader.learnedCount || 0} 詞` : `積分 ${leader.totalScore || 0}`}
+                </p>
+              </div>
+              <div className={`font-mono font-bold text-sm ${sortBy === 'score' ? 'text-indigo-600' : 'text-emerald-600'}`}>
+                {sortBy === 'score' ? `${leader.totalScore || 0} 分` : `${leader.learnedCount || 0} 詞`}
+              </div>
             </div>
           ))}
           {leaders.length === 0 && <p className="text-gray-400 text-center py-4 text-sm">暫無排名</p>}
@@ -209,13 +263,6 @@ const AuthScreen = ({ onLogin }) => {
       {/* Public Leaderboard Section (Top 10) */}
       <div className="w-full max-w-sm order-2 md:order-2">
         <div className="bg-white/80 backdrop-blur-md p-6 rounded-2xl shadow-xl border border-white/50 h-full max-h-[600px] overflow-y-auto">
-           <div className="flex items-center gap-2 mb-4 border-b border-gray-200/50 pb-4">
-              <Trophy className="text-yellow-500 w-6 h-6" /> 
-              <div>
-                <h3 className="text-xl font-bold text-gray-800">目前戰況</h3>
-                <p className="text-xs text-gray-500">前 10 名狀元</p>
-              </div>
-           </div>
            <Leaderboard user={null} limit={10} compact={true} />
         </div>
       </div>
