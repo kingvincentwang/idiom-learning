@@ -284,19 +284,7 @@ const LearningMode = ({ user, idioms, refreshStats }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [learnedIds, setLearnedIds] = useState(new Set());
   
-  // Safely handle empty data
-  if (!idioms || idioms.length === 0) {
-    return (
-      <div className="bg-white p-10 rounded-2xl shadow-lg text-center">
-        <Loader2 className="animate-spin w-10 h-10 text-indigo-500 mx-auto mb-4" />
-        <h3 className="text-xl font-bold text-gray-800">題庫讀取中...</h3>
-        <p className="text-gray-500">如果長時間未顯示，請至後台匯入資料。</p>
-      </div>
-    );
-  }
-
-  const currentIdiom = idioms[currentIndex];
-
+  // 修正：useEffect 必須在最上層，不能在 if return 之後
   useEffect(() => {
     if (!user) return;
     const fetchLearned = async () => {
@@ -308,6 +296,21 @@ const LearningMode = ({ user, idioms, refreshStats }) => {
     };
     fetchLearned();
   }, [user]);
+
+  // 安全檢查移到 Hook 之後
+  if (!idioms || idioms.length === 0) {
+    return (
+      <div className="bg-white p-10 rounded-2xl shadow-lg text-center">
+        <Loader2 className="animate-spin w-10 h-10 text-indigo-500 mx-auto mb-4" />
+        <h3 className="text-xl font-bold text-gray-800">題庫讀取中...</h3>
+        <p className="text-gray-500">如果長時間未顯示，請至後台匯入資料。</p>
+      </div>
+    );
+  }
+
+  const currentIdiom = idioms[currentIndex];
+  // 確保 currentIdiom 存在，避免陣列索引越界
+  if (!currentIdiom) return null;
 
   const markAsLearned = async () => {
     if (!user || learnedIds.has(currentIdiom.id)) return;
