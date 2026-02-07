@@ -29,6 +29,7 @@ import {
 } from 'lucide-react';
 
 // --- Firebase Configuration ---
+// 部署時請務必填寫您的 Firebase 設定
 const firebaseConfig = {
   apiKey: "AIzaSyB4iiFv3knAGF-JuvR554-6YaBWrTkGI8Y",
   authDomain: "idiom-learning.firebaseapp.com",
@@ -44,15 +45,14 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
 
-// --- 🔒 管理員設定 (Security Config) ---
-// 請在此輸入允許進入後台的 Email (可以是多個)
+// --- 🔒 管理員設定 ---
 const ADMIN_EMAILS = [
   "teacher@example.com", 
   "admin@idiom-master.com",
-  "hs3591@gses.hcc.edu.tw" // <--- 請替換成您自己的 Email
+  "hs3591@gses.hcc.edu.tw" // 請替換成您自己的 Email
 ];
 
-// --- Default Data for Initialization ---
+// --- Initialization Data ---
 const INITIAL_IDIOMS = [
   { word: '半途而廢', pinyin: 'bàn tú ér fèi', meaning: '事情沒有做完就停止。比喻做事有始無終。', example: '學習任何技能都不能半途而廢，否則永遠無法精通。', options: ['堅持到底', '半途而廢', '持之以恆', '廢寢忘食'] },
   { word: '一石二鳥', pinyin: 'yī shí èr niǎo', meaning: '比喻做一件事獲得兩種效果。', example: '這次出差既處理了公務，又順道拜訪了老友，真是一石二鳥。', options: ['一石二鳥', '畫蛇添足', '緣木求魚', '顧此失彼'] },
@@ -81,9 +81,8 @@ const AuthScreen = ({ onLogin }) => {
     setLoading(true);
 
     try {
-      let userCredential;
       if (isRegister) {
-        userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
         const user = userCredential.user;
         await updateProfile(user, { displayName: username });
         await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'user_stats', user.uid), {
@@ -94,7 +93,7 @@ const AuthScreen = ({ onLogin }) => {
           lastActive: serverTimestamp()
         }, { merge: true });
       } else {
-        userCredential = await signInWithEmailAndPassword(auth, email, password);
+        await signInWithEmailAndPassword(auth, email, password);
       }
     } catch (err) {
       console.error("Auth error:", err);
@@ -121,14 +120,12 @@ const AuthScreen = ({ onLogin }) => {
         </div>
         <h2 className="text-3xl font-bold text-gray-800 mb-2 text-center">成語狀元榜</h2>
         <p className="text-gray-500 mb-8 text-center">{isRegister ? "建立您的學習帳號" : "登入以繼續學習"}</p>
-
         {error && (
           <div className="bg-red-50 border border-red-100 text-red-600 p-3 rounded-lg mb-4 text-sm flex items-start gap-2">
             <AlertCircle size={18} className="mt-0.5 shrink-0" />
             <span>{error}</span>
           </div>
         )}
-        
         <form onSubmit={handleAuth} className="space-y-4">
           {isRegister && (
             <div>
@@ -158,7 +155,7 @@ const AuthScreen = ({ onLogin }) => {
   );
 };
 
-// 2. Admin Panel Component
+// 2. Admin Panel
 const AdminPanel = ({ idioms, refreshIdioms }) => {
   const [newIdiom, setNewIdiom] = useState({ word: '', pinyin: '', meaning: '', example: '', option1: '', option2: '', option3: '' });
   const [loading, setLoading] = useState(false);
@@ -187,11 +184,8 @@ const AdminPanel = ({ idioms, refreshIdioms }) => {
     e.preventDefault();
     setLoading(true);
     try {
-      // Create options array: correct answer + 3 distractors
       const options = [newIdiom.word, newIdiom.option1, newIdiom.option2, newIdiom.option3];
-      // Shuffle options simple implementation
       const shuffledOptions = options.sort(() => Math.random() - 0.5);
-
       await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'idioms'), {
         word: newIdiom.word,
         pinyin: newIdiom.pinyin,
@@ -232,9 +226,7 @@ const AdminPanel = ({ idioms, refreshIdioms }) => {
           </button>
         )}
       </div>
-
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        {/* Form */}
         <div className="bg-gray-50 p-4 rounded-xl h-fit">
           <h4 className="font-bold text-gray-700 mb-4 flex items-center gap-2"><Plus size={18}/> 新增成語</h4>
           <form onSubmit={handleAdd} className="space-y-3">
@@ -242,21 +234,17 @@ const AdminPanel = ({ idioms, refreshIdioms }) => {
             <input placeholder="拼音 (例如：bàn tú ér fèi)" value={newIdiom.pinyin} onChange={e=>setNewIdiom({...newIdiom, pinyin: e.target.value})} className="w-full p-2 border rounded" required />
             <textarea placeholder="釋義" value={newIdiom.meaning} onChange={e=>setNewIdiom({...newIdiom, meaning: e.target.value})} className="w-full p-2 border rounded" required />
             <textarea placeholder="例句" value={newIdiom.example} onChange={e=>setNewIdiom({...newIdiom, example: e.target.value})} className="w-full p-2 border rounded" required />
-            
             <div className="bg-white p-3 rounded border border-gray-200">
               <p className="text-xs text-gray-500 mb-2 font-bold">干擾選項 (錯誤答案)：</p>
               <input placeholder="錯誤選項 1" value={newIdiom.option1} onChange={e=>setNewIdiom({...newIdiom, option1: e.target.value})} className="w-full p-2 border rounded mb-2 text-sm" required />
               <input placeholder="錯誤選項 2" value={newIdiom.option2} onChange={e=>setNewIdiom({...newIdiom, option2: e.target.value})} className="w-full p-2 border rounded mb-2 text-sm" required />
               <input placeholder="錯誤選項 3" value={newIdiom.option3} onChange={e=>setNewIdiom({...newIdiom, option3: e.target.value})} className="w-full p-2 border rounded text-sm" required />
             </div>
-
             <button type="submit" disabled={loading} className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 rounded">
               {loading ? '儲存中...' : '新增成語'}
             </button>
           </form>
         </div>
-
-        {/* List */}
         <div>
           <h4 className="font-bold text-gray-700 mb-4">目前題庫 ({idioms.length})</h4>
           <div className="space-y-2 max-h-[600px] overflow-y-auto pr-2">
@@ -279,12 +267,12 @@ const AdminPanel = ({ idioms, refreshIdioms }) => {
   );
 };
 
-// 3. Learning Mode (Cloud)
+// 3. Learning Mode (Cloud - Fixed Hooks Order)
 const LearningMode = ({ user, idioms, refreshStats }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [learnedIds, setLearnedIds] = useState(new Set());
   
-  // 修正：useEffect 必須在最上層，不能在 if return 之後
+  // FIX: useEffect is declared BEFORE any return statement
   useEffect(() => {
     if (!user) return;
     const fetchLearned = async () => {
@@ -297,7 +285,7 @@ const LearningMode = ({ user, idioms, refreshStats }) => {
     fetchLearned();
   }, [user]);
 
-  // 安全檢查移到 Hook 之後
+  // Safe to return now that hooks are declared
   if (!idioms || idioms.length === 0) {
     return (
       <div className="bg-white p-10 rounded-2xl shadow-lg text-center">
@@ -309,7 +297,7 @@ const LearningMode = ({ user, idioms, refreshStats }) => {
   }
 
   const currentIdiom = idioms[currentIndex];
-  // 確保 currentIdiom 存在，避免陣列索引越界
+  // Guard against array index out of bounds
   if (!currentIdiom) return null;
 
   const markAsLearned = async () => {
@@ -341,7 +329,6 @@ const LearningMode = ({ user, idioms, refreshStats }) => {
           進度: {learnedIds.size} / {idioms.length}
         </span>
       </div>
-
       <div className="text-center py-8 bg-slate-50 rounded-xl mb-6 relative overflow-hidden">
         {isLearned && (
           <div className="absolute top-2 right-2 text-green-500 flex items-center gap-1 bg-green-50 px-2 py-1 rounded text-xs font-bold">
@@ -351,7 +338,6 @@ const LearningMode = ({ user, idioms, refreshStats }) => {
         <h1 className="text-5xl font-extrabold text-gray-800 mb-2 tracking-widest">{currentIdiom.word}</h1>
         <p className="text-gray-500 font-mono text-lg">{currentIdiom.pinyin}</p>
       </div>
-
       <div className="space-y-4 mb-8">
         <div className="bg-amber-50 p-4 rounded-lg border-l-4 border-amber-400">
           <h4 className="font-bold text-amber-800 mb-1">釋義：</h4>
@@ -362,7 +348,6 @@ const LearningMode = ({ user, idioms, refreshStats }) => {
           <p className="text-gray-700">{currentIdiom.example}</p>
         </div>
       </div>
-
       <div className="flex gap-3 justify-center">
         <button onClick={() => setCurrentIndex((prev) => (prev - 1 + idioms.length) % idioms.length)} className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg">上一則</button>
         <button onClick={markAsLearned} disabled={isLearned} className={`flex-1 max-w-xs py-3 px-6 rounded-lg font-bold text-white transition-all transform active:scale-95 flex items-center justify-center gap-2 ${isLearned ? 'bg-gray-400 cursor-default' : 'bg-indigo-600 hover:bg-indigo-700 shadow-md hover:shadow-lg'}`}>
@@ -374,7 +359,7 @@ const LearningMode = ({ user, idioms, refreshStats }) => {
   );
 };
 
-// 4. Quiz Mode (Cloud)
+// 4. Quiz Mode
 const QuizMode = ({ user, idioms, refreshStats }) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentQuestion, setCurrentQuestion] = useState(null);
@@ -411,13 +396,11 @@ const QuizMode = ({ user, idioms, refreshStats }) => {
     if (selectedOption) return; 
     setSelectedOption(option);
     const correct = option === currentQuestion.word;
-    
     let newScore = score;
     if (correct) {
       newScore = score + 10;
       setScore(newScore);
     }
-
     setTimeout(async () => {
       if (questionCount + 1 >= 5) {
         finishQuiz(newScore);
@@ -501,7 +484,7 @@ const QuizMode = ({ user, idioms, refreshStats }) => {
   );
 };
 
-// 5. Leaderboard (Same as before but compact)
+// 5. Leaderboard
 const Leaderboard = ({ user }) => {
   const [leaders, setLeaders] = useState([]);
   useEffect(() => {
@@ -557,6 +540,7 @@ export default function App() {
       setInitLoading(false);
       if (currentUser) fetchUserStats(currentUser.uid);
     });
+    // Call fetchIdioms here is safe because this useEffect runs only ONCE on mount
     fetchIdioms();
     return () => unsubscribe();
   }, []);
@@ -580,7 +564,6 @@ export default function App() {
 
   const handleLogout = async () => { await signOut(auth); };
 
-  // 🔒 Admin Check Logic
   const isAdmin = user && user.email && ADMIN_EMAILS.includes(user.email);
 
   if (initLoading) return <div className="min-h-screen flex items-center justify-center bg-gray-50 text-gray-400">載入中...</div>;
@@ -603,7 +586,6 @@ export default function App() {
           </div>
         </div>
       </header>
-
       <main className="max-w-4xl mx-auto px-4 py-6">
         {activeTab === 'learn' && <div className="animate-fade-in"><LearningMode user={user} idioms={idioms} userStats={userStats} refreshStats={() => fetchUserStats(user.uid)} /></div>}
         {activeTab === 'quiz' && <div className="animate-fade-in"><QuizMode user={user} idioms={idioms} refreshStats={() => fetchUserStats(user.uid)} /></div>}
@@ -622,14 +604,11 @@ export default function App() {
           </div>
         )}
       </main>
-
       <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 pb-safe z-50">
         <div className="max-w-md mx-auto flex justify-around p-2">
           <button onClick={() => setActiveTab('learn')} className={`flex flex-col items-center p-2 w-20 ${activeTab === 'learn' ? 'text-indigo-600' : 'text-gray-400'}`}><BookOpen size={24} /><span className="text-xs font-bold mt-1">學習</span></button>
           <button onClick={() => setActiveTab('quiz')} className={`flex flex-col items-center p-2 w-20 ${activeTab === 'quiz' ? 'text-indigo-600' : 'text-gray-400'}`}><Brain size={24} /><span className="text-xs font-bold mt-1">測驗</span></button>
           <button onClick={() => setActiveTab('leaderboard')} className={`flex flex-col items-center p-2 w-20 ${activeTab === 'leaderboard' ? 'text-indigo-600' : 'text-gray-400'}`}><BarChart3 size={24} /><span className="text-xs font-bold mt-1">榜單</span></button>
-          
-          {/* 只有管理員才看得到後台按鈕 */}
           {isAdmin && (
             <button onClick={() => setActiveTab('admin')} className={`flex flex-col items-center p-2 w-20 ${activeTab === 'admin' ? 'text-orange-600' : 'text-gray-400'}`}><Settings size={24} /><span className="text-xs font-bold mt-1">後台</span></button>
           )}
