@@ -26,7 +26,7 @@ import {
 import { 
   BookOpen, Trophy, User, LogOut, CheckCircle, Brain, 
   BarChart3, Mail, Lock, Loader2, AlertCircle, Plus, Trash2, Settings, ShieldAlert, FileJson,
-  Library, Edit3, TrendingUp, Home, LayoutDashboard, XCircle
+  Library, Edit3, TrendingUp, Home, LayoutDashboard, XCircle, ExternalLink
 } from 'lucide-react';
 
 // --- Firebase Configuration ---
@@ -651,21 +651,33 @@ export default function App() {
               <BookOpen size={24} />
             </div>
             <div>
-              <h1 className="text-2xl font-bold tracking-widest">關西國小成語學習網</h1>
-              <p className="text-xs text-red-200 tracking-wider">成語自學及測驗平台</p>
+              <h1 className="text-2xl font-bold tracking-widest">成語狀元榜</h1>
+              <p className="text-xs text-red-200 tracking-wider">Idiom Learning Platform</p>
             </div>
           </div>
 
           {/* Navigation Links */}
-          <nav className="flex items-center gap-1 md:gap-6 text-sm font-medium">
+          <nav className="flex flex-wrap justify-center items-center gap-2 md:gap-4 text-sm font-medium">
             <button onClick={() => setView('home')} className={`px-3 py-2 rounded hover:bg-red-700 transition ${view === 'home' ? 'bg-red-900' : ''}`}>首頁</button>
+            
+            {/* External Links */}
+            <a href="https://script.google.com/a/macros/gses.hcc.edu.tw/s/AKfycbwKwUAkUoFyRIjIFLFQFXRVBqUrB8bUv3AXnHe_hStwhZ45sh6LHcmswnA0RGC_7CwT/exec" target="_blank" rel="noopener noreferrer" className="px-3 py-2 rounded hover:bg-red-700 transition flex items-center gap-1">
+              <ExternalLink size={14}/>成語大挑戰
+            </a>
+            <a href="https://script.google.com/a/macros/gses.hcc.edu.tw/s/AKfycbxxpsX1KfYmYFL3bx9SVDd4r5qGM77eVYK-Hj6SkT03x86JBEaZm92GdXyTzUyUkt0vOQ/exec" target="_blank" rel="noopener noreferrer" className="px-3 py-2 rounded hover:bg-red-700 transition flex items-center gap-1">
+              <ExternalLink size={14}/>看故事學成語
+            </a>
+            <a href="https://script.google.com/a/macros/gses.hcc.edu.tw/s/AKfycbyfpCIJgE8oh26lxX7KxgCp0IohoHbFkYfPPKcamdsJWICQaI1VoJP7HFW-hIVMHAzPvQ/exec" target="_blank" rel="noopener noreferrer" className="px-3 py-2 rounded hover:bg-red-700 transition flex items-center gap-1">
+              <ExternalLink size={14}/>成語小遊戲
+            </a>
+
             {user && (
               <button onClick={() => setView('dashboard')} className={`px-3 py-2 rounded hover:bg-red-700 transition flex items-center gap-1 ${view === 'dashboard' ? 'bg-red-900' : ''}`}>
-                <LayoutDashboard size={16}/> 個人儀表板
+                <LayoutDashboard size={16}/> 儀表板
               </button>
             )}
-            <button onClick={() => navigateTo('learn')} className={`px-3 py-2 rounded hover:bg-red-700 transition ${view === 'learn' ? 'bg-red-900' : ''}`}>成語學習區</button>
-            <button onClick={() => navigateTo('quiz')} className={`px-3 py-2 rounded hover:bg-red-700 transition ${view === 'quiz' ? 'bg-red-900' : ''}`}>互動測驗</button>
+            <button onClick={() => navigateTo('learn')} className={`px-3 py-2 rounded hover:bg-red-700 transition ${view === 'learn' ? 'bg-red-900' : ''}`}>學習區</button>
+            <button onClick={() => navigateTo('quiz')} className={`px-3 py-2 rounded hover:bg-red-700 transition ${view === 'quiz' ? 'bg-red-900' : ''}`}>測驗區</button>
             
             {user ? (
               <div className="flex items-center gap-4 ml-4 pl-4 border-l border-red-700">
