@@ -277,20 +277,28 @@ const AuthPage = ({ onLoginSuccess }) => {
 const LearningMode = ({ user, idioms, refreshStats }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [learnedIds, setLearnedIds] = useState(new Set());
+  const [isReady, setIsReady] = useState(false);
   
   useEffect(() => {
-    if (!user) return;
-    const fetchLearned = async () => {
+    if (!user || idioms.length === 0) return;
+    if (isReady) return;
+
+    const init = async () => {
       const q = collection(db, 'artifacts', appId, 'users', user.uid, 'learned_idioms');
       const snap = await getDocs(q);
       const ids = new Set();
       snap.forEach(d => ids.add(d.data().idiomId));
       setLearnedIds(ids);
-    };
-    fetchLearned();
-  }, [user]);
 
-  if (!idioms || idioms.length === 0) return <div className="p-10 text-center"><Loader2 className="animate-spin inline mr-2"/>題庫載入中...</div>;
+      const idx = idioms.findIndex(i => !ids.has(i.id));
+      if (idx !== -1) setCurrentIndex(idx);
+      
+      setIsReady(true);
+    };
+    init();
+  }, [user, idioms, isReady]);
+
+  if (!isReady || !idioms || idioms.length === 0) return <div className="p-10 text-center"><Loader2 className="animate-spin inline mr-2"/>題庫載入中...</div>;
   const current = idioms[currentIndex];
   if (!current) return null;
   const isLearned = learnedIds.has(current.id);
@@ -649,7 +657,7 @@ export default function App() {
         <div className="max-w-7xl mx-auto px-4 py-4 flex flex-col md:flex-row justify-between items-center gap-4">
           <div className="flex items-center gap-3 cursor-pointer" onClick={() => setView('home')}>
             <div className="bg-white text-red-800 p-2 rounded-lg shadow-inner"><BookOpen size={24} /></div>
-            <div><h1 className="text-2xl font-bold tracking-widest">關西國小成語網</h1><p className="text-xs text-red-200 tracking-wider">一個成語自學和測驗的平台</p></div>
+            <div><h1 className="text-2xl font-bold tracking-widest">成語狀元榜</h1><p className="text-xs text-red-200 tracking-wider">Idiom Learning Platform</p></div>
           </div>
           <nav className="flex flex-wrap justify-center items-center gap-2 md:gap-4 text-sm font-medium">
             <button onClick={() => setView('home')} className={`px-3 py-2 rounded hover:bg-red-700 transition ${view === 'home' ? 'bg-red-900' : ''}`}>首頁</button>
