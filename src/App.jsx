@@ -26,7 +26,7 @@ import {
 import { 
   BookOpen, Trophy, User, LogOut, CheckCircle, Brain, 
   BarChart3, Mail, Lock, Loader2, AlertCircle, Plus, Trash2, Settings, ShieldAlert, FileJson,
-  Library, Edit3, TrendingUp, Home, LayoutDashboard, XCircle, ExternalLink
+  Library, Edit3, TrendingUp, Home, LayoutDashboard, XCircle, ExternalLink, Book
 } from 'lucide-react';
 
 // --- Firebase Configuration ---
@@ -52,7 +52,7 @@ const ADMIN_EMAILS = [
   "hs3591@gses.hcc.edu.tw" 
 ];
 
-// --- Initialization Data ---
+// --- Initialization Data (Idioms) ---
 const INITIAL_IDIOMS = [
   { word: '半途而廢', pinyin: 'bàn tú ér fèi', meaning: '事情沒有做完就停止。比喻做事有始無終。', example: '學習任何技能都不能半途而廢，否則永遠無法精通。', options: ['堅持到底', '半途而廢', '持之以恆', '廢寢忘食'] },
   { word: '一石二鳥', pinyin: 'yī shí èr niǎo', meaning: '比喻做一件事獲得兩種效果。', example: '這次出差既處理了公務，又順道拜訪了老友，真是一石二鳥。', options: ['一石二鳥', '畫蛇添足', '緣木求魚', '顧此失彼'] },
@@ -64,7 +64,33 @@ const INITIAL_IDIOMS = [
   { word: '破釜沉舟', pinyin: 'pò fǔ chén zhōu', meaning: '比喻下定決心，不顧一切地幹到底。', example: '面對強大的對手，我們必須有破釜沉舟的決心才能獲勝。', options: ['背水一戰', '破釜沉舟', '臨陣脫逃', '優柔寡斷'] },
 ];
 
-// --- Sub-Components ---
+// --- Initialization Data (Reading Stories) ---
+const INITIAL_READING_DATA = [
+  {
+    title: "勤學的阿明",
+    content: "阿明是個聰明的學生，但他有個缺點，就是做事常常【半途而廢】。每次學鋼琴，練了兩天就喊累；學畫畫，畫了一半就跑出去玩。老師告訴他：「學習必須持之以恆，不能像你這樣。」\n\n有一天，學校舉辦繪畫比賽。阿明這次下定決心要好好完成作品。他畫了一隻栩栩如生的老虎，但在最後關頭，他覺得老虎的腳看起來空空的，竟然給老虎畫上了翅膀，結果變成了四不像。同學看了都笑他是【畫蛇添足】。\n\n經過這次教訓，阿明決定改過自新。他開始模仿古人【臥薪嘗膽】的精神，每天刻苦練習。終於在期末考時，他不但數學考了一百分，還因為字跡工整被選為模範生，這真是【一石二鳥】啊！",
+    questions: [
+      { question: "阿明一開始最大的缺點是什麼？", options: ["不夠聰明", "半途而廢", "喜歡睡覺", "不愛說話"], answer: "半途而廢" },
+      { question: "「畫蛇添足」在故事中是指阿明做了什麼事？", options: ["給蛇畫腳", "給老虎畫翅膀", "給貓畫鬍鬚", "給鳥畫牙齒"], answer: "給老虎畫翅膀" },
+      { question: "阿明後來模仿什麼精神來刻苦練習？", options: ["守株待兔", "臥薪嘗膽", "緣木求魚", "掩耳盜鈴"], answer: "臥薪嘗膽" },
+      { question: "故事最後說「一石二鳥」是指什麼？", options: ["抓到兩隻鳥", "考一百分且當模範生", "畫畫得獎", "老師稱讚他"], answer: "考一百分且當模範生" },
+      { question: "這則故事主要想告訴我們什麼道理？", options: ["畫畫不能畫翅膀", "做人要誠實", "做事要堅持且恰到好處", "運氣很重要"], answer: "做事要堅持且恰到好處" }
+    ]
+  },
+  {
+    title: "將軍的決策",
+    content: "古代有一位將軍帶兵出征。敵人的軍隊數量遠遠超過他們，士兵們都很害怕。將軍知道，如果不想辦法提升士氣，這場仗必輸無疑。\n\n到了河對岸，將軍下令把所有的船都鑿沉，把煮飯的鍋都打破，只帶三天的乾糧。他告訴士兵：「我們已經沒有退路了！如果不打勝仗，就只有死路一條！」這就是【破釜沉舟】的由來。\n\n士兵們看到沒有退路，每個人都抱著必死的決心向前衝。敵人雖然人多，但沒想到這支軍隊這麼勇猛，最後被打得落花流水。\n\n這場戰役後，將軍的名聲傳遍天下。但他並沒有因此驕傲，反而更加謙虛地向賢人請教治國之道，這真是【錦上添花】，讓他的聲望更高了。",
+    questions: [
+      { question: "將軍為什麼要鑿沉船隻、打破鍋子？", options: ["發瘋了", "表示破釜沉舟的決心", "物資太多帶不走", "敵人要求的"], answer: "表示破釜沉舟的決心" },
+      { question: "「破釜沉舟」是用來比喻什麼？", options: ["做事衝動", "下定決心，不顧一切", "破壞環境", "放棄希望"], answer: "下定決心，不顧一切" },
+      { question: "這場戰爭最後的結果如何？", options: ["將軍輸了", "雙方平手", "將軍獲勝", "沒有打起來"], answer: "將軍獲勝" },
+      { question: "故事最後提到的「錦上添花」是指什麼？", options: ["將軍穿了花衣服", "將軍去種花", "將軍謙虛求教讓聲望更高", "將軍收到了花"], answer: "將軍謙虛求教讓聲望更高" },
+      { question: "這個故事主要在強調什麼的重要性？", options: ["武器精良", "人數眾多", "決心與士氣", "地形優勢"], answer: "決心與士氣" }
+    ]
+  }
+];
+
+// --- Components ---
 
 // 1. Leaderboard List Item
 const LeaderboardItem = ({ rank, name, score, unit = '分', highlight = false }) => (
@@ -84,42 +110,49 @@ const LeaderboardItem = ({ rank, name, score, unit = '分', highlight = false })
 );
 
 // 2. Dashboard Component
-const Dashboard = ({ user, userStats, idioms, navigateTo }) => {
+const Dashboard = ({ user, userStats, idioms, readingMaterials, navigateTo }) => {
   const totalIdioms = idioms.length || 1;
   const learnedCount = userStats.learnedCount || 0;
   const learnedPct = Math.min(100, Math.round((learnedCount / totalIdioms) * 100));
 
-  const totalScore = userStats.totalScore || 0;
+  const totalScore = userStats.totalScore || 0; // Idiom Quiz Score
   const scoreGoal = 1000;
   const scorePct = Math.min(100, Math.round((totalScore / scoreGoal) * 100));
+
+  const readingScore = userStats.readingScore || 0;
+  const readingGoal = 500; // Example goal
+  const readingPct = Math.min(100, Math.round((readingScore / readingGoal) * 100));
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8 animate-fade-in">
       <h2 className="text-2xl font-bold text-gray-800 mb-6 border-l-4 border-red-800 pl-4">個人學習儀表板</h2>
       
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        {/* Learning Progress */}
         <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-          <h3 className="text-red-800 font-bold mb-6 text-center text-lg">學習進度</h3>
+          <h3 className="text-red-800 font-bold mb-6 text-center text-lg">成語學習進度</h3>
           <div className="w-full bg-gray-200 rounded-full h-4 mb-4 overflow-hidden">
             <div className="bg-red-600 h-4 rounded-full transition-all duration-1000 ease-out" style={{ width: `${learnedPct}%` }}></div>
           </div>
           <p className="text-center text-gray-600 font-bold text-xl">{learnedPct}%</p>
         </div>
 
+        {/* Idiom Quiz Progress */}
         <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-          <h3 className="text-red-800 font-bold mb-6 text-center text-lg">文意測驗進度 (目標: {scoreGoal}分)</h3>
+          <h3 className="text-red-800 font-bold mb-6 text-center text-lg">文意測驗進度 (目標: {scoreGoal})</h3>
           <div className="w-full bg-gray-200 rounded-full h-4 mb-4 overflow-hidden">
             <div className="bg-red-600 h-4 rounded-full transition-all duration-1000 ease-out" style={{ width: `${scorePct}%` }}></div>
           </div>
           <p className="text-center text-gray-600 font-bold text-xl">{scorePct}%</p>
         </div>
 
-        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-          <h3 className="text-red-800 font-bold mb-6 text-center text-lg">閱讀測驗進度</h3>
+        {/* Reading Quiz Progress */}
+        <div className="bg-white p-6 rounded-lg shadow-sm border border-red-200 ring-2 ring-red-50">
+          <h3 className="text-red-800 font-bold mb-6 text-center text-lg">閱讀測驗進度 (目標: {readingGoal})</h3>
           <div className="w-full bg-gray-200 rounded-full h-4 mb-4 overflow-hidden">
-            <div className="bg-gray-400 h-4 rounded-full" style={{ width: `0%` }}></div>
+            <div className="bg-red-600 h-4 rounded-full transition-all duration-1000 ease-out" style={{ width: `${readingPct}%` }}></div>
           </div>
-          <p className="text-center text-gray-600 font-bold text-xl">0%</p>
+          <p className="text-center text-gray-600 font-bold text-xl">{readingPct}%</p>
         </div>
       </div>
 
@@ -127,25 +160,25 @@ const Dashboard = ({ user, userStats, idioms, navigateTo }) => {
         <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 flex flex-col h-full">
           <h4 className="text-red-800 font-bold mb-3 text-lg">您的學習進度</h4>
           <div className="flex-grow text-gray-600 text-sm mb-4 leading-relaxed">
-            {learnedCount === 0 ? "您還沒有開始任何學習，立即前往學習區開始吧！" : `您已經學習了 ${learnedCount} 個成語，總題庫共 ${totalIdioms} 個。繼續保持！`}
+            {learnedCount === 0 ? "您還沒有開始任何學習，立即前往學習區開始吧！" : `您已經學習了 ${learnedCount} 個成語，總題庫共 ${totalIdioms} 個。`}
           </div>
-          <button onClick={() => navigateTo('learn')} className="text-red-600 font-bold text-sm hover:underline self-start mt-auto">立即前往學習區開始吧 !</button>
+          <button onClick={() => navigateTo('learn')} className="text-red-600 font-bold text-sm hover:underline self-start mt-auto">立即前往學習區</button>
         </div>
 
         <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 flex flex-col h-full">
-          <h4 className="text-red-800 font-bold mb-3 text-lg">您的測驗成績</h4>
+          <h4 className="text-red-800 font-bold mb-3 text-lg">您的文意測驗</h4>
           <div className="flex-grow text-gray-600 text-sm mb-4 leading-relaxed">
-             {totalScore === 0 ? "您還沒有參加任何測驗，立即前往文意測驗區開始吧！" : `您目前累積積分為 ${totalScore} 分。挑戰更高分，登上排行榜！`}
+             {totalScore === 0 ? "您還沒有參加任何測驗，立即前往文意測驗區開始吧！" : `文意測驗累積積分：${totalScore} 分。`}
           </div>
-          <button onClick={() => navigateTo('quiz')} className="text-red-600 font-bold text-sm hover:underline self-start mt-auto">立即前往文意測驗區開始吧 !</button>
+          <button onClick={() => navigateTo('quiz')} className="text-red-600 font-bold text-sm hover:underline self-start mt-auto">立即前往文意測驗</button>
         </div>
 
         <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 flex flex-col h-full">
-          <h4 className="text-red-800 font-bold mb-3 text-lg">您的閱讀測驗進度</h4>
+          <h4 className="text-red-800 font-bold mb-3 text-lg">您的閱讀測驗</h4>
           <div className="flex-grow text-gray-600 text-sm mb-4 leading-relaxed">
-            您還沒有完成任何閱讀測驗，立即前往閱讀測驗區開始吧！(此功能即將推出)
+            {readingScore === 0 ? "您還沒有完成任何閱讀測驗，立即前往挑戰！" : `閱讀測驗累積積分：${readingScore} 分。`}
           </div>
-          <button className="text-gray-400 font-bold text-sm cursor-not-allowed self-start mt-auto">即將開放</button>
+          <button onClick={() => navigateTo('reading')} className="text-red-600 font-bold text-sm hover:underline self-start mt-auto">立即前往閱讀測驗</button>
         </div>
       </div>
     </div>
@@ -155,7 +188,7 @@ const Dashboard = ({ user, userStats, idioms, navigateTo }) => {
 // 3. Home Page Component
 const HomePage = ({ navigateTo, user }) => {
   const [scoreLeaders, setScoreLeaders] = useState([]);
-  const [learnLeaders, setLearnLeaders] = useState([]);
+  const [readingLeaders, setReadingLeaders] = useState([]); // New Reading Leaderboard
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -165,11 +198,13 @@ const HomePage = ({ navigateTo, user }) => {
         const users = [];
         querySnapshot.forEach((doc) => users.push(doc.data()));
         
+        // Sort for Idiom Score
         const byScore = [...users].sort((a, b) => (b.totalScore || 0) - (a.totalScore || 0)).slice(0, 3);
         setScoreLeaders(byScore);
 
-        const byLearned = [...users].sort((a, b) => (b.learnedCount || 0) - (a.learnedCount || 0)).slice(0, 3);
-        setLearnLeaders(byLearned);
+        // Sort for Reading Score
+        const byReading = [...users].sort((a, b) => (b.readingScore || 0) - (a.readingScore || 0)).slice(0, 3);
+        setReadingLeaders(byReading);
       } catch (e) {
         console.error(e);
       } finally {
@@ -214,13 +249,13 @@ const HomePage = ({ navigateTo, user }) => {
               )}
             </div>
             <div>
-              <h3 className="text-center font-bold text-red-700 mb-4">勤學進度排行榜 (數量)</h3>
+              <h3 className="text-center font-bold text-red-700 mb-4">閱讀測驗排行榜 (總分)</h3>
               {loading ? <div className="text-center text-gray-400">載入中...</div> : (
                 <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100 min-h-[200px]">
-                  {learnLeaders.map((u, i) => (
-                    <LeaderboardItem key={i} rank={i+1} name={u.displayName} score={u.learnedCount || 0} unit="詞" highlight={user && u.uid === user.uid} />
+                  {readingLeaders.map((u, i) => (
+                    <LeaderboardItem key={i} rank={i+1} name={u.displayName} score={u.readingScore || 0} unit="分" highlight={user && u.uid === user.uid} />
                   ))}
-                  {learnLeaders.length === 0 && <p className="text-center text-gray-400 mt-10">尚無資料</p>}
+                  {readingLeaders.length === 0 && <p className="text-center text-gray-400 mt-10">尚無資料</p>}
                 </div>
               )}
             </div>
@@ -229,27 +264,22 @@ const HomePage = ({ navigateTo, user }) => {
       </div>
 
       <div className="bg-gray-50 py-16 px-4">
+        {/* Same Feature Cards */}
         <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8">
           <div className="bg-white p-8 rounded-lg shadow-md text-center border-t-4 border-blue-500 hover:shadow-xl transition">
-            <div className="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Library className="text-blue-600 w-8 h-8" />
-            </div>
+            <div className="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4"><Library className="text-blue-600 w-8 h-8" /></div>
             <h3 className="text-xl font-bold text-gray-800 mb-2">豐富成語庫</h3>
-            <p className="text-gray-500 text-sm leading-relaxed">收錄數百條精選成語，包含拼音、釋義、典故和例句，讓您全方位掌握成語精髓。</p>
+            <p className="text-gray-500 text-sm leading-relaxed">收錄數百條精選成語，包含拼音、釋義、典故和例句。</p>
           </div>
           <div className="bg-white p-8 rounded-lg shadow-md text-center border-t-4 border-orange-500 hover:shadow-xl transition">
-            <div className="bg-orange-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Edit3 className="text-orange-600 w-8 h-8" />
-            </div>
+            <div className="bg-orange-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4"><Edit3 className="text-orange-600 w-8 h-8" /></div>
             <h3 className="text-xl font-bold text-gray-800 mb-2">互動測驗</h3>
-            <p className="text-gray-500 text-sm leading-relaxed">透過有趣的測驗鞏固學習成果，即時回饋，檢驗您的掌握程度，讓學習不枯燥。</p>
+            <p className="text-gray-500 text-sm leading-relaxed">文意測驗與閱讀測驗雙管齊下，全方位檢測學習成果。</p>
           </div>
           <div className="bg-white p-8 rounded-lg shadow-md text-center border-t-4 border-green-500 hover:shadow-xl transition">
-            <div className="bg-green-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-              <TrendingUp className="text-green-600 w-8 h-8" />
-            </div>
+            <div className="bg-green-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4"><TrendingUp className="text-green-600 w-8 h-8" /></div>
             <h3 className="text-xl font-bold text-gray-800 mb-2">進度追蹤</h3>
-            <p className="text-gray-500 text-sm leading-relaxed">個人學習儀表板，清晰記錄學習進度和測驗成績，讓您的每一分努力都看得見。</p>
+            <p className="text-gray-500 text-sm leading-relaxed">個人學習儀表板，清晰記錄各項能力指標。</p>
           </div>
         </div>
       </div>
@@ -275,7 +305,7 @@ const AuthPage = ({ onLoginSuccess }) => {
         const cred = await createUserWithEmailAndPassword(auth, email, password);
         await updateProfile(cred.user, { displayName: username });
         await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'user_stats', cred.user.uid), {
-          uid: cred.user.uid, displayName: username, totalScore: 0, learnedCount: 0, lastActive: serverTimestamp()
+          uid: cred.user.uid, displayName: username, totalScore: 0, readingScore: 0, learnedCount: 0, lastActive: serverTimestamp()
         }, { merge: true });
       } else {
         await signInWithEmailAndPassword(auth, email, password);
@@ -293,29 +323,19 @@ const AuthPage = ({ onLoginSuccess }) => {
     <div className="min-h-[80vh] flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8 bg-white p-10 rounded-xl shadow-lg border border-gray-200">
         <div className="text-center">
-          <div className="mx-auto h-12 w-12 bg-red-100 rounded-full flex items-center justify-center">
-            <Lock className="h-6 w-6 text-red-800" />
-          </div>
+          <div className="mx-auto h-12 w-12 bg-red-100 rounded-full flex items-center justify-center"><Lock className="h-6 w-6 text-red-800" /></div>
           <h2 className="mt-6 text-3xl font-extrabold text-gray-900">{isRegister ? '註冊新帳號' : '登入您的帳號'}</h2>
         </div>
         {error && <div className="bg-red-50 text-red-600 p-3 rounded text-sm">{error}</div>}
         <form className="mt-8 space-y-6" onSubmit={handleAuth}>
           <div className="rounded-md shadow-sm -space-y-px">
-            {isRegister && (
-              <input type="text" required className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-red-500 focus:border-red-500 focus:z-10 sm:text-sm" placeholder="暱稱" value={username} onChange={e => setUsername(e.target.value)} />
-            )}
+            {isRegister && <input type="text" required className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-red-500 focus:border-red-500 focus:z-10 sm:text-sm" placeholder="暱稱" value={username} onChange={e => setUsername(e.target.value)} />}
             <input type="email" required className={`appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 ${!isRegister ? 'rounded-t-md' : ''} focus:outline-none focus:ring-red-500 focus:border-red-500 focus:z-10 sm:text-sm`} placeholder="Email" value={email} onChange={e => setEmail(e.target.value)} />
             <input type="password" required className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-red-500 focus:border-red-500 focus:z-10 sm:text-sm" placeholder="密碼" value={password} onChange={e => setPassword(e.target.value)} />
           </div>
-          <button type="submit" disabled={loading} className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-red-800 hover:bg-red-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
-            {loading ? '處理中...' : (isRegister ? '註冊' : '登入')}
-          </button>
+          <button type="submit" disabled={loading} className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-red-800 hover:bg-red-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">{loading ? '處理中...' : (isRegister ? '註冊' : '登入')}</button>
         </form>
-        <div className="text-center">
-          <button onClick={() => setIsRegister(!isRegister)} className="font-medium text-red-800 hover:text-red-700">
-            {isRegister ? '已有帳號？登入' : '還沒有帳號？註冊'}
-          </button>
-        </div>
+        <div className="text-center"><button onClick={() => setIsRegister(!isRegister)} className="font-medium text-red-800 hover:text-red-700">{isRegister ? '已有帳號？登入' : '還沒有帳號？註冊'}</button></div>
       </div>
     </div>
   );
@@ -363,14 +383,8 @@ const LearningMode = ({ user, idioms, refreshStats }) => {
           <h1 className="text-5xl font-bold text-gray-800 mb-2">{current.word}</h1>
           <p className="text-xl text-gray-500 font-serif mb-6">{current.pinyin}</p>
           <div className="text-left space-y-4 max-w-xl mx-auto">
-            <div className="bg-white p-4 rounded border-l-4 border-amber-400 shadow-sm">
-              <span className="font-bold text-amber-600 block mb-1">釋義</span>
-              <p className="text-gray-700">{current.meaning}</p>
-            </div>
-            <div className="bg-white p-4 rounded border-l-4 border-blue-400 shadow-sm">
-              <span className="font-bold text-blue-600 block mb-1">例句</span>
-              <p className="text-gray-700">{current.example || "暫無例句"}</p>
-            </div>
+            <div className="bg-white p-4 rounded border-l-4 border-amber-400 shadow-sm"><span className="font-bold text-amber-600 block mb-1">釋義</span><p className="text-gray-700">{current.meaning}</p></div>
+            <div className="bg-white p-4 rounded border-l-4 border-blue-400 shadow-sm"><span className="font-bold text-blue-600 block mb-1">例句</span><p className="text-gray-700">{current.example || "暫無例句"}</p></div>
           </div>
         </div>
         <div className="bg-gray-100 p-4 flex justify-between">
@@ -383,7 +397,140 @@ const LearningMode = ({ user, idioms, refreshStats }) => {
   );
 };
 
-// 6. Quiz Mode (Updated with Feedback)
+// 6. Reading Mode (NEW: Story + 5 Questions)
+const ReadingMode = ({ user, readingMaterials, refreshStats }) => {
+  const [selectedStory, setSelectedStory] = useState(null); // null = list view
+  const [currentQIndex, setCurrentQIndex] = useState(0);
+  const [score, setScore] = useState(0);
+  const [finished, setFinished] = useState(false);
+  const [selectedOption, setSelectedOption] = useState(null);
+  const [isCorrect, setIsCorrect] = useState(null);
+
+  if (!readingMaterials || readingMaterials.length === 0) {
+    return <div className="p-10 text-center"><Loader2 className="animate-spin inline mr-2"/>閱讀教材載入中... (請至後台匯入)</div>;
+  }
+
+  // View: Story List
+  if (!selectedStory) {
+    return (
+      <div className="max-w-4xl mx-auto my-10 px-4 animate-fade-in">
+        <h2 className="text-2xl font-bold text-gray-800 mb-6 border-l-4 border-red-800 pl-4">成語閱讀測驗</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {readingMaterials.map((item, idx) => (
+            <div key={idx} className="bg-white p-6 rounded-xl shadow-md border border-gray-200 hover:shadow-lg transition">
+              <h3 className="text-xl font-bold text-red-800 mb-3">{item.title}</h3>
+              <p className="text-gray-500 text-sm mb-4 line-clamp-3">{item.content}</p>
+              <button 
+                onClick={() => { setSelectedStory(item); setCurrentQIndex(0); setScore(0); setFinished(false); setSelectedOption(null); setIsCorrect(null); }}
+                className="w-full bg-red-800 text-white py-2 rounded font-bold hover:bg-red-900"
+              >
+                閱讀並挑戰
+              </button>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  // View: Quiz Result
+  if (finished) {
+    return (
+      <div className="max-w-lg mx-auto my-10 bg-white p-8 rounded-xl shadow-lg text-center border-t-8 border-red-800 animate-fade-in">
+        <Trophy className="w-20 h-20 mx-auto text-yellow-500 mb-4" />
+        <h2 className="text-2xl font-bold text-gray-800">閱讀測驗結束</h2>
+        <p className="text-gray-500 mt-2">故事：{selectedStory.title}</p>
+        <p className="text-5xl font-bold text-red-700 my-6">{score} 分</p>
+        <button onClick={() => setSelectedStory(null)} className="bg-gray-600 text-white px-6 py-2 rounded hover:bg-gray-700">返回列表</button>
+      </div>
+    );
+  }
+
+  // View: Reading & Questions
+  const currentQ = selectedStory.questions[currentQIndex];
+
+  const handleAnswer = (opt) => {
+    if (selectedOption) return;
+    setSelectedOption(opt);
+    const correct = opt === currentQ.answer;
+    setIsCorrect(correct);
+    let currentScore = score;
+    if (correct) {
+      currentScore += 20; // 5 questions * 20 pts = 100
+      setScore(currentScore);
+    }
+
+    setTimeout(async () => {
+      setSelectedOption(null);
+      setIsCorrect(null);
+      if (currentQIndex < selectedStory.questions.length - 1) {
+        setCurrentQIndex(prev => prev + 1);
+      } else {
+        setFinished(true);
+        // Save Reading Score
+        if (user) {
+           await setDoc(doc(db, 'artifacts', appId, 'users', user.uid, 'reading_results', `${selectedStory.title}_${Date.now()}`), { 
+             story: selectedStory.title, score: currentScore, ts: serverTimestamp() 
+           });
+           // Update User Total Reading Score (cumulative or max? Let's do cumulative for leaderboard fun)
+           await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'user_stats', user.uid), { 
+             readingScore: increment(currentScore), displayName: user.displayName 
+           }, { merge: true });
+           refreshStats();
+        }
+      }
+    }, 2000);
+  };
+
+  return (
+    <div className="max-w-4xl mx-auto my-8 px-4 flex flex-col md:flex-row gap-8 animate-fade-in">
+      {/* Left: Story Content */}
+      <div className="flex-1 bg-white p-8 rounded-xl shadow-md border border-gray-200 h-fit">
+        <h2 className="text-2xl font-bold text-red-800 mb-4 flex items-center gap-2"><Book size={24}/> {selectedStory.title}</h2>
+        <div className="text-gray-700 leading-relaxed whitespace-pre-wrap text-lg">
+          {selectedStory.content}
+        </div>
+      </div>
+
+      {/* Right: Quiz Question */}
+      <div className="w-full md:w-96">
+        <div className="bg-white p-6 rounded-xl shadow-lg border-t-4 border-red-800 sticky top-24">
+          <div className="flex justify-between mb-4 text-gray-500 font-bold">
+            <span>第 {currentQIndex + 1} / {selectedStory.questions.length} 題</span>
+            <span>得分: {score}</span>
+          </div>
+
+          {/* Feedback */}
+          {selectedOption && (
+            <div className={`mb-4 p-3 rounded text-center font-bold text-sm animate-bounce-in ${isCorrect ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+              {isCorrect ? "答對了！" : `答錯了！答案是：${currentQ.answer}`}
+            </div>
+          )}
+
+          <div className="font-bold text-gray-800 mb-6 text-lg">{currentQ.question}</div>
+          
+          <div className="space-y-3">
+            {currentQ.options.map((opt, i) => {
+               let btnClass = "w-full p-3 rounded-lg text-left border border-gray-200 hover:bg-gray-50 transition";
+               if (selectedOption) {
+                 if (opt === currentQ.answer) btnClass = "w-full p-3 rounded-lg text-left bg-green-100 border-green-500 text-green-800 font-bold";
+                 else if (opt === selectedOption) btnClass = "w-full p-3 rounded-lg text-left bg-red-100 border-red-500 text-red-800";
+                 else btnClass = "w-full p-3 rounded-lg text-left border border-gray-100 text-gray-400";
+               }
+               return (
+                 <button key={i} onClick={() => handleAnswer(opt)} disabled={!!selectedOption} className={btnClass}>
+                   {opt}
+                 </button>
+               )
+            })}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// 7. Quiz Mode (Standard Idiom Quiz)
 const QuizMode = ({ user, idioms, refreshStats }) => {
   const [playing, setPlaying] = useState(false);
   const [q, setQ] = useState(null);
@@ -395,49 +542,25 @@ const QuizMode = ({ user, idioms, refreshStats }) => {
 
   if (!idioms || idioms.length < 4) return <div className="p-10 text-center text-gray-500">題庫不足，請管理員新增題目。</div>;
 
-  const start = () => { 
-    setPlaying(true); 
-    setScore(0); 
-    setCount(1); // Start at 1 for display
-    setFinished(false); 
-    setSelectedOption(null);
-    setIsCorrect(null);
-    generateQ();
-  };
-
-  const generateQ = () => {
-    setQ(idioms[Math.floor(Math.random() * idioms.length)]);
-  };
+  const start = () => { setPlaying(true); setScore(0); setCount(1); setFinished(false); setSelectedOption(null); setIsCorrect(null); generateQ(); };
+  const generateQ = () => { setQ(idioms[Math.floor(Math.random() * idioms.length)]); };
 
   const handleAnswer = (opt) => {
-    if (selectedOption) return; // Prevent double click
+    if (selectedOption) return;
     setSelectedOption(opt);
-    
     const correct = opt === q.word;
     setIsCorrect(correct);
-    
     let currentScore = score;
-    if (correct) {
-        currentScore += 10;
-        setScore(currentScore);
-    }
+    if (correct) { currentScore += 10; setScore(currentScore); }
 
-    // 2 Seconds delay for feedback
-    setTimeout(() => {
-        setSelectedOption(null);
-        setIsCorrect(null);
-        if (count < 5) {
-            setCount(c => c + 1);
-            generateQ();
-        } else {
-            end(currentScore);
-        }
+    setTimeout(async () => {
+        setSelectedOption(null); setIsCorrect(null);
+        if (count < 5) { setCount(c => c + 1); generateQ(); } else { end(currentScore); }
     }, 2000);
   };
 
   const end = async (finalScore) => {
-    setPlaying(false); 
-    setFinished(true);
+    setPlaying(false); setFinished(true);
     if (user) {
       await setDoc(doc(collection(db, 'artifacts', appId, 'users', user.uid, 'quiz_results')), { score: finalScore, ts: serverTimestamp() });
       await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'user_stats', user.uid), { totalScore: increment(finalScore), displayName: user.displayName }, { merge: true });
@@ -457,54 +580,21 @@ const QuizMode = ({ user, idioms, refreshStats }) => {
   if (playing && q) return (
     <div className="max-w-2xl mx-auto my-10 bg-white p-6 rounded-xl shadow-lg border border-gray-200 animate-fade-in">
       <div className="flex justify-between mb-4 text-gray-500 font-bold"><span>第 {count} / 5 題</span><span>得分: {score}</span></div>
-      
-      {/* Feedback Banner */}
       {selectedOption && (
         <div className={`mb-6 p-4 rounded-lg text-center font-bold animate-bounce-in shadow-inner ${isCorrect ? 'bg-green-100 text-green-800 border border-green-200' : 'bg-red-50 text-red-800 border border-red-200'}`}>
-            {isCorrect ? (
-                <span className="flex items-center justify-center gap-2 text-lg"><CheckCircle size={24}/> 答對了！太棒了！</span>
-            ) : (
-                <div className="flex flex-col items-center">
-                    <span className="flex items-center gap-2 mb-2 text-lg"><XCircle size={24}/> 哎呀，答錯了！</span>
-                    <span className="text-sm bg-white px-3 py-1 rounded-full border border-red-200 shadow-sm text-gray-600">
-                        正確答案是：<span className="text-green-600 font-bold text-base ml-1">{q.word}</span>
-                    </span>
-                </div>
-            )}
+            {isCorrect ? <span className="flex items-center justify-center gap-2 text-lg"><CheckCircle size={24}/> 答對了！太棒了！</span> : <div className="flex flex-col items-center"><span className="flex items-center gap-2 mb-2 text-lg"><XCircle size={24}/> 哎呀，答錯了！</span><span className="text-sm bg-white px-3 py-1 rounded-full border border-red-200 shadow-sm text-gray-600">正確答案是：<span className="text-green-600 font-bold text-base ml-1">{q.word}</span></span></div>}
         </div>
       )}
-
-      <div className="bg-gray-100 p-6 rounded-lg mb-6 text-lg text-gray-800 font-medium border-l-4 border-red-800 shadow-sm">
-        "{q.meaning}"
-      </div>
-      
+      <div className="bg-gray-100 p-6 rounded-lg mb-6 text-lg text-gray-800 font-medium border-l-4 border-red-800 shadow-sm">"{q.meaning}"</div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {q.options.map((opt, i) => {
             let btnClass = "bg-white border-2 border-gray-200 text-gray-700 hover:border-red-500 hover:bg-red-50";
-            
             if (selectedOption) {
-                if (opt === q.word) {
-                    // Always highlight correct answer in green
-                    btnClass = "bg-green-100 border-green-500 text-green-800 font-bold shadow-md transform scale-105 ring-2 ring-green-200";
-                } else if (opt === selectedOption && !isCorrect) {
-                    // Highlight selected wrong answer in red
-                    btnClass = "bg-red-100 border-red-500 text-red-800 opacity-90";
-                } else {
-                    // Fade out other wrong options
-                    btnClass = "bg-gray-50 border-gray-100 text-gray-400 opacity-40";
-                }
+                if (opt === q.word) btnClass = "bg-green-100 border-green-500 text-green-800 font-bold shadow-md transform scale-105 ring-2 ring-green-200";
+                else if (opt === selectedOption && !isCorrect) btnClass = "bg-red-100 border-red-500 text-red-800 opacity-90";
+                else btnClass = "bg-gray-50 border-gray-100 text-gray-400 opacity-40";
             }
-
-            return (
-              <button 
-                key={i} 
-                onClick={() => handleAnswer(opt)} 
-                disabled={!!selectedOption} 
-                className={`p-4 rounded-lg text-left transition-all duration-300 relative overflow-hidden ${btnClass}`}
-              >
-                {opt}
-              </button>
-            )
+            return <button key={i} onClick={() => handleAnswer(opt)} disabled={!!selectedOption} className={`p-4 rounded-lg text-left transition-all duration-300 relative overflow-hidden ${btnClass}`}>{opt}</button>
         })}
       </div>
     </div>
@@ -522,17 +612,25 @@ const QuizMode = ({ user, idioms, refreshStats }) => {
   );
 };
 
-// 7. Admin Panel (Same as before)
+// 8. Admin Panel
 const AdminPanel = ({ idioms, refreshIdioms }) => {
   const [jsonMode, setJsonMode] = useState(false);
   const [jsonInput, setJsonInput] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const init = async () => {
-    if(!confirm('匯入預設?')) return;
+  const initIdioms = async () => {
+    if(!confirm('匯入預設成語題庫?')) return;
     setLoading(true);
     for (const i of INITIAL_IDIOMS) await addDoc(collection(db,'artifacts',appId,'public','data','idioms'), {...i, createdAt: serverTimestamp()});
     setLoading(false); refreshIdioms();
+  };
+
+  const initReading = async () => {
+    if(!confirm('匯入預設閱讀測驗(2篇)?')) return;
+    setLoading(true);
+    for (const i of INITIAL_READING_DATA) await addDoc(collection(db,'artifacts',appId,'public','data','reading_materials'), {...i, createdAt: serverTimestamp()});
+    setLoading(false); 
+    alert('閱讀測驗匯入成功！請重新整理網頁。');
   };
 
   const importJson = async () => {
@@ -561,8 +659,9 @@ const AdminPanel = ({ idioms, refreshIdioms }) => {
     <div className="max-w-4xl mx-auto my-10 bg-white p-6 rounded shadow animate-fade-in">
       <div className="flex justify-between mb-4">
         <h2 className="font-bold text-xl">後台管理</h2>
-        <div>
-          {idioms.length === 0 && <button onClick={init} className="bg-green-600 text-white px-3 py-1 rounded text-sm mr-2">預設匯入</button>}
+        <div className="flex gap-2">
+          <button onClick={initReading} disabled={loading} className="bg-purple-600 text-white px-3 py-1 rounded text-sm">匯入閱讀測驗</button>
+          {idioms.length === 0 && <button onClick={initIdioms} disabled={loading} className="bg-green-600 text-white px-3 py-1 rounded text-sm">匯入成語題庫</button>}
           <button onClick={() => setJsonMode(!jsonMode)} className="bg-blue-600 text-white px-3 py-1 rounded text-sm">切換模式</button>
         </div>
       </div>
@@ -589,9 +688,10 @@ const AdminPanel = ({ idioms, refreshIdioms }) => {
 // --- Main App Component ---
 export default function App() {
   const [user, setUser] = useState(null);
-  const [view, setView] = useState('home'); // home, dashboard, learn, quiz, login, admin
+  const [view, setView] = useState('home'); 
   const [loading, setLoading] = useState(true);
   const [idioms, setIdioms] = useState([]);
+  const [readingMaterials, setReadingMaterials] = useState([]);
   const [userStats, setUserStats] = useState({});
 
   useEffect(() => {
@@ -603,11 +703,10 @@ export default function App() {
     initAuth();
     const unsub = onAuthStateChanged(auth, u => {
       setUser(u); setLoading(false);
-      if (u) {
-        fetchStats(u.uid);
-      }
+      if (u) fetchStats(u.uid);
     });
     fetchIdioms();
+    fetchReadingMaterials();
     return () => unsub();
   }, []);
 
@@ -623,105 +722,70 @@ export default function App() {
     setIdioms(res);
   };
 
+  const fetchReadingMaterials = async () => {
+    try {
+      const q = query(collection(db,'artifacts',appId,'public','data','reading_materials'), orderBy('createdAt'));
+      const snap = await getDocs(q);
+      const res = []; snap.forEach(d => res.push({id:d.id, ...d.data()}));
+      setReadingMaterials(res);
+    } catch(e) { console.error(e); }
+  };
+
   const navigateTo = (target) => {
-    if ((target === 'learn' || target === 'quiz' || target === 'dashboard') && !user) {
+    if ((target === 'learn' || target === 'quiz' || target === 'dashboard' || target === 'reading') && !user) {
       setView('login');
     } else {
       setView(target);
     }
   };
 
-  const handleLoginSuccess = () => {
-    // 登入成功後，直接跳轉到儀表板
-    setView('dashboard');
-  };
-
+  const handleLoginSuccess = () => { setView('dashboard'); };
   const isAdmin = user && ADMIN_EMAILS.includes(user.email);
 
   if (loading) return <div className="h-screen flex items-center justify-center text-gray-500">載入中...</div>;
 
   return (
     <div className="min-h-screen flex flex-col font-sans bg-gray-50">
-      {/* 1. Official Header */}
       <header className="bg-red-800 text-white shadow-md">
         <div className="max-w-7xl mx-auto px-4 py-4 flex flex-col md:flex-row justify-between items-center gap-4">
-          {/* Logo Section */}
           <div className="flex items-center gap-3 cursor-pointer" onClick={() => setView('home')}>
-            <div className="bg-white text-red-800 p-2 rounded-lg shadow-inner">
-              <BookOpen size={24} />
-            </div>
-            <div>
-              <h1 className="text-2xl font-bold tracking-widest">成語狀元榜</h1>
-              <p className="text-xs text-red-200 tracking-wider">Idiom Learning Platform</p>
-            </div>
+            <div className="bg-white text-red-800 p-2 rounded-lg shadow-inner"><BookOpen size={24} /></div>
+            <div><h1 className="text-2xl font-bold tracking-widest">成語狀元榜</h1><p className="text-xs text-red-200 tracking-wider">Idiom Learning Platform</p></div>
           </div>
-
-          {/* Navigation Links */}
           <nav className="flex flex-wrap justify-center items-center gap-2 md:gap-4 text-sm font-medium">
             <button onClick={() => setView('home')} className={`px-3 py-2 rounded hover:bg-red-700 transition ${view === 'home' ? 'bg-red-900' : ''}`}>首頁</button>
-            
-            {/* External Links */}
-            <a href="https://script.google.com/a/macros/gses.hcc.edu.tw/s/AKfycbwKwUAkUoFyRIjIFLFQFXRVBqUrB8bUv3AXnHe_hStwhZ45sh6LHcmswnA0RGC_7CwT/exec" target="_blank" rel="noopener noreferrer" className="px-3 py-2 rounded hover:bg-red-700 transition flex items-center gap-1">
-              <ExternalLink size={14}/>成語大挑戰
-            </a>
-            <a href="https://script.google.com/a/macros/gses.hcc.edu.tw/s/AKfycbxxpsX1KfYmYFL3bx9SVDd4r5qGM77eVYK-Hj6SkT03x86JBEaZm92GdXyTzUyUkt0vOQ/exec" target="_blank" rel="noopener noreferrer" className="px-3 py-2 rounded hover:bg-red-700 transition flex items-center gap-1">
-              <ExternalLink size={14}/>看故事學成語
-            </a>
-            <a href="https://script.google.com/a/macros/gses.hcc.edu.tw/s/AKfycbyfpCIJgE8oh26lxX7KxgCp0IohoHbFkYfPPKcamdsJWICQaI1VoJP7HFW-hIVMHAzPvQ/exec" target="_blank" rel="noopener noreferrer" className="px-3 py-2 rounded hover:bg-red-700 transition flex items-center gap-1">
-              <ExternalLink size={14}/>成語小遊戲
-            </a>
-
-            {user && (
-              <button onClick={() => setView('dashboard')} className={`px-3 py-2 rounded hover:bg-red-700 transition flex items-center gap-1 ${view === 'dashboard' ? 'bg-red-900' : ''}`}>
-                <LayoutDashboard size={16}/> 儀表板
-              </button>
-            )}
+            <a href="https://script.google.com/a/macros/gses.hcc.edu.tw/s/AKfycbwKwUAkUoFyRIjIFLFQFXRVBqUrB8bUv3AXnHe_hStwhZ45sh6LHcmswnA0RGC_7CwT/exec" target="_blank" rel="noopener noreferrer" className="px-3 py-2 rounded hover:bg-red-700 transition flex items-center gap-1"><ExternalLink size={14}/>成語大挑戰</a>
+            <a href="https://script.google.com/a/macros/gses.hcc.edu.tw/s/AKfycbxxpsX1KfYmYFL3bx9SVDd4r5qGM77eVYK-Hj6SkT03x86JBEaZm92GdXyTzUyUkt0vOQ/exec" target="_blank" rel="noopener noreferrer" className="px-3 py-2 rounded hover:bg-red-700 transition flex items-center gap-1"><ExternalLink size={14}/>看故事學成語</a>
+            <a href="https://script.google.com/a/macros/gses.hcc.edu.tw/s/AKfycbyfpCIJgE8oh26lxX7KxgCp0IohoHbFkYfPPKcamdsJWICQaI1VoJP7HFW-hIVMHAzPvQ/exec" target="_blank" rel="noopener noreferrer" className="px-3 py-2 rounded hover:bg-red-700 transition flex items-center gap-1"><ExternalLink size={14}/>成語小遊戲</a>
+            {user && <button onClick={() => setView('dashboard')} className={`px-3 py-2 rounded hover:bg-red-700 transition flex items-center gap-1 ${view === 'dashboard' ? 'bg-red-900' : ''}`}><LayoutDashboard size={16}/> 儀表板</button>}
             <button onClick={() => navigateTo('learn')} className={`px-3 py-2 rounded hover:bg-red-700 transition ${view === 'learn' ? 'bg-red-900' : ''}`}>學習區</button>
             <button onClick={() => navigateTo('quiz')} className={`px-3 py-2 rounded hover:bg-red-700 transition ${view === 'quiz' ? 'bg-red-900' : ''}`}>測驗區</button>
+            <button onClick={() => navigateTo('reading')} className={`px-3 py-2 rounded hover:bg-red-700 transition ${view === 'reading' ? 'bg-red-900' : ''}`}>閱讀測驗</button>
             
             {user ? (
               <div className="flex items-center gap-4 ml-4 pl-4 border-l border-red-700">
-                <div className="text-right hidden md:block">
-                  <p className="text-xs text-red-200">歡迎回來</p>
-                  <p className="font-bold">{user.displayName}</p>
-                </div>
+                <div className="text-right hidden md:block"><p className="text-xs text-red-200">歡迎回來</p><p className="font-bold">{user.displayName}</p></div>
                 <button onClick={() => { signOut(auth); setView('home'); }} className="bg-red-900 hover:bg-red-950 p-2 rounded text-xs">登出</button>
               </div>
             ) : (
-              <button onClick={() => setView('login')} className="ml-2 bg-white text-red-800 px-4 py-2 rounded font-bold hover:bg-gray-100 transition">
-                登入 / 註冊
-              </button>
+              <button onClick={() => setView('login')} className="ml-2 bg-white text-red-800 px-4 py-2 rounded font-bold hover:bg-gray-100 transition">登入 / 註冊</button>
             )}
           </nav>
         </div>
       </header>
 
-      {/* 2. Main Content Area */}
       <main className="flex-grow">
         {view === 'home' && <HomePage navigateTo={navigateTo} user={user} />}
         {view === 'login' && <AuthPage onLoginSuccess={handleLoginSuccess} />}
-        {view === 'dashboard' && <Dashboard user={user} userStats={userStats} idioms={idioms} navigateTo={navigateTo} />}
+        {view === 'dashboard' && <Dashboard user={user} userStats={userStats} idioms={idioms} readingMaterials={readingMaterials} navigateTo={navigateTo} />}
         {view === 'learn' && <LearningMode user={user} idioms={idioms} refreshStats={() => fetchStats(user.uid)} />}
         {view === 'quiz' && <QuizMode user={user} idioms={idioms} refreshStats={() => fetchStats(user.uid)} />}
+        {view === 'reading' && <ReadingMode user={user} readingMaterials={readingMaterials} refreshStats={() => fetchStats(user.uid)} />}
         {view === 'admin' && isAdmin && <AdminPanel idioms={idioms} refreshIdioms={fetchIdioms} />}
       </main>
 
-      {/* 3. Footer */}
       <footer className="bg-gray-800 text-gray-400 py-8 text-center text-sm">
-        <div className="max-w-6xl mx-auto px-4">
-          <p className="mb-2">© 2026 成語狀元榜學習網. All rights reserved.</p>
-          <div className="flex justify-center gap-4">
-            <span className="hover:text-white cursor-pointer">隱私權政策</span>
-            <span>|</span>
-            <span className="hover:text-white cursor-pointer">使用條款</span>
-            {isAdmin && (
-              <>
-                <span>|</span>
-                <span onClick={() => setView('admin')} className="text-gray-600 hover:text-white cursor-pointer">管理員後台</span>
-              </>
-            )}
-          </div>
-        </div>
+        <div className="max-w-6xl mx-auto px-4"><p className="mb-2">© 2026 成語狀元榜學習網. All rights reserved.</p><div className="flex justify-center gap-4"><span className="hover:text-white cursor-pointer">隱私權政策</span><span>|</span><span className="hover:text-white cursor-pointer">使用條款</span>{isAdmin && <><span>|</span><span onClick={() => setView('admin')} className="text-gray-600 hover:text-white cursor-pointer">管理員後台</span></>}</div></div>
       </footer>
     </div>
   );
