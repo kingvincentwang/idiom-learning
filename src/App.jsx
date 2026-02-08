@@ -30,13 +30,14 @@ import {
 } from 'lucide-react';
 
 // --- Firebase Configuration ---
-const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_PROJECT.firebaseapp.com",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_PROJECT.appspot.com",
-  messagingSenderId: "SENDER_ID",
-  appId: "APP_ID"
+const firebaseConfig = {
+  apiKey: "AIzaSyB4iiFv3knAGF-JuvR554-6YaBWrTkGI8Y",
+  authDomain: "idiom-learning.firebaseapp.com",
+  projectId: "idiom-learning",
+  storageBucket: "idiom-learning.firebasestorage.app",
+  messagingSenderId: "267603143127",
+  appId: "1:267603143127:web:afa6c02a92940793fc4392",
+  measurementId: "G-ETWXCMNVCH"
 };
 
 const app = initializeApp(firebaseConfig);
@@ -48,7 +49,7 @@ const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
 const ADMIN_EMAILS = [
   "teacher@example.com", 
   "admin@idiom-master.com",
-  "your_email@example.com" 
+  "hs3591@gses.hcc.edu.tw" 
 ];
 
 // --- Initialization Data ---
