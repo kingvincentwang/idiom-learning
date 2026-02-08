@@ -333,6 +333,22 @@ const ReadingMode = ({ user, readingMaterials, refreshStats }) => {
   const [finished, setFinished] = useState(false);
   const [selectedOption, setSelectedOption] = useState(null);
   const [isCorrect, setIsCorrect] = useState(null);
+  const [completedStories, setCompletedStories] = useState(new Set()); // New state for history
+
+  // Auto-fetch history
+  useEffect(() => {
+    if (!user) return;
+    const fetchHistory = async () => {
+      try {
+        const q = collection(db, 'artifacts', appId, 'users', user.uid, 'reading_results');
+        const snap = await getDocs(q);
+        const done = new Set();
+        snap.forEach(d => done.add(d.data().story));
+        setCompletedStories(done);
+      } catch (e) { console.error(e); }
+    };
+    fetchHistory();
+  }, [user, finished]); // Refresh when user changes or quiz finishes
 
   if (!readingMaterials || readingMaterials.length === 0) return <div className="p-10 text-center"><Loader2 className="animate-spin inline mr-2"/>閱讀教材載入中... (請至後台匯入)</div>;
 
@@ -341,16 +357,24 @@ const ReadingMode = ({ user, readingMaterials, refreshStats }) => {
       <div className="max-w-5xl mx-auto my-10 px-4 animate-fade-in">
         <h2 className="text-2xl font-bold text-gray-800 mb-8 border-l-8 border-red-800 pl-4">成語閱讀測驗列表</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {readingMaterials.map((item, idx) => (
-            <div key={idx} className="bg-white p-8 rounded-2xl shadow-sm border border-gray-200 hover:shadow-xl transition group cursor-pointer" onClick={() => { setSelectedStory(item); setCurrentQIndex(0); setScore(0); setFinished(false); setSelectedOption(null); setIsCorrect(null); }}>
-              <div className="flex justify-between items-start mb-4">
-                <h3 className="text-2xl font-bold text-gray-800 group-hover:text-red-800 transition">{item.title}</h3>
-                <span className="bg-red-100 text-red-800 text-xs px-2 py-1 rounded-full">5 題</span>
+          {readingMaterials.map((item, idx) => {
+            const isDone = completedStories.has(item.title);
+            return (
+              <div key={idx} className={`bg-white p-8 rounded-2xl shadow-sm border border-gray-200 hover:shadow-xl transition group cursor-pointer ${isDone ? 'bg-green-50/30' : ''}`} onClick={() => { setSelectedStory(item); setCurrentQIndex(0); setScore(0); setFinished(false); setSelectedOption(null); setIsCorrect(null); }}>
+                <div className="flex justify-between items-start mb-4">
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-2xl font-bold text-gray-800 group-hover:text-red-800 transition">{item.title}</h3>
+                    {isDone && <span className="bg-green-100 text-green-700 text-xs px-2 py-1 rounded-full font-bold flex items-center gap-1"><CheckCircle size={12}/> 已測驗</span>}
+                  </div>
+                  <span className="bg-red-100 text-red-800 text-xs px-2 py-1 rounded-full">5 題</span>
+                </div>
+                <p className="text-gray-500 text-base mb-6 line-clamp-3 leading-relaxed">{item.content}</p>
+                <button className={`w-full py-3 rounded-xl font-bold transition ${isDone ? 'bg-green-600 text-white hover:bg-green-700' : 'bg-gray-50 text-gray-600 group-hover:bg-red-800 group-hover:text-white'}`}>
+                  {isDone ? '再次挑戰' : '立即閱讀並挑戰'}
+                </button>
               </div>
-              <p className="text-gray-500 text-base mb-6 line-clamp-3 leading-relaxed">{item.content}</p>
-              <button className="w-full bg-gray-50 text-gray-600 py-3 rounded-xl font-bold group-hover:bg-red-800 group-hover:text-white transition">立即閱讀並挑戰</button>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     );
@@ -560,7 +584,7 @@ const AdminPanel = ({ idioms, readingMaterials, refreshIdioms, refreshReading })
   );
 };
 
-// --- Main App ---
+// --- Main App Component ---
 export default function App() {
   const [user, setUser] = useState(null);
   const [view, setView] = useState('home'); 
