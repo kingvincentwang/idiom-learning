@@ -26,18 +26,17 @@ import {
 import { 
   BookOpen, Trophy, User, LogOut, CheckCircle, Brain, 
   BarChart3, Mail, Lock, Loader2, AlertCircle, Plus, Trash2, Settings, ShieldAlert, FileJson,
-  Library, Edit3, TrendingUp, Home
+  Library, Edit3, TrendingUp, Home, LayoutDashboard
 } from 'lucide-react';
 
 // --- Firebase Configuration ---
-const firebaseConfig = {
-  apiKey: "AIzaSyB4iiFv3knAGF-JuvR554-6YaBWrTkGI8Y",
-  authDomain: "idiom-learning.firebaseapp.com",
-  projectId: "idiom-learning",
-  storageBucket: "idiom-learning.firebasestorage.app",
-  messagingSenderId: "267603143127",
-  appId: "1:267603143127:web:afa6c02a92940793fc4392",
-  measurementId: "G-ETWXCMNVCH"
+const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_PROJECT.firebaseapp.com",
+  projectId: "YOUR_PROJECT_ID",
+  storageBucket: "YOUR_PROJECT.appspot.com",
+  messagingSenderId: "SENDER_ID",
+  appId: "APP_ID"
 };
 
 const app = initializeApp(firebaseConfig);
@@ -49,7 +48,7 @@ const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
 const ADMIN_EMAILS = [
   "teacher@example.com", 
   "admin@idiom-master.com",
-  "hs3591@gses.hcc.edu.tw" 
+  "your_email@example.com" 
 ];
 
 // --- Initialization Data ---
@@ -83,7 +82,106 @@ const LeaderboardItem = ({ rank, name, score, unit = '分', highlight = false })
   </div>
 );
 
-// 2. Home Page Component (The School Style Landing)
+// 2. Dashboard Component (NEW)
+const Dashboard = ({ user, userStats, idioms, navigateTo }) => {
+  const totalIdioms = idioms.length || 1;
+  const learnedCount = userStats.learnedCount || 0;
+  const learnedPct = Math.min(100, Math.round((learnedCount / totalIdioms) * 100));
+
+  const totalScore = userStats.totalScore || 0;
+  // 設定一個虛擬目標分數 (例如 1000 分) 來顯示進度條，讓畫面更豐富
+  const scoreGoal = 1000;
+  const scorePct = Math.min(100, Math.round((totalScore / scoreGoal) * 100));
+
+  return (
+    <div className="max-w-7xl mx-auto px-4 py-8 animate-fade-in">
+      <h2 className="text-2xl font-bold text-gray-800 mb-6 border-l-4 border-red-800 pl-4">個人學習儀表板</h2>
+      
+      {/* Stats Cards Row */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        {/* Learning Progress Card */}
+        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+          <h3 className="text-red-800 font-bold mb-6 text-center text-lg">學習進度</h3>
+          <div className="w-full bg-gray-200 rounded-full h-4 mb-4 overflow-hidden">
+            <div 
+              className="bg-red-600 h-4 rounded-full transition-all duration-1000 ease-out" 
+              style={{ width: `${learnedPct}%` }}
+            ></div>
+          </div>
+          <p className="text-center text-gray-600 font-bold text-xl">{learnedPct}%</p>
+        </div>
+
+        {/* Quiz Progress Card */}
+        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+          <h3 className="text-red-800 font-bold mb-6 text-center text-lg">文意測驗進度 (目標: {scoreGoal}分)</h3>
+          <div className="w-full bg-gray-200 rounded-full h-4 mb-4 overflow-hidden">
+            <div 
+              className="bg-red-600 h-4 rounded-full transition-all duration-1000 ease-out" 
+              style={{ width: `${scorePct}%` }}
+            ></div>
+          </div>
+          <p className="text-center text-gray-600 font-bold text-xl">{scorePct}%</p>
+        </div>
+
+        {/* Reading Progress Card (Placeholder) */}
+        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+          <h3 className="text-red-800 font-bold mb-6 text-center text-lg">閱讀測驗進度</h3>
+          <div className="w-full bg-gray-200 rounded-full h-4 mb-4 overflow-hidden">
+            <div className="bg-gray-400 h-4 rounded-full" style={{ width: `0%` }}></div>
+          </div>
+          <p className="text-center text-gray-600 font-bold text-xl">0%</p>
+        </div>
+      </div>
+
+      {/* Info Cards Row */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 flex flex-col h-full">
+          <h4 className="text-red-800 font-bold mb-3 text-lg">您的學習進度</h4>
+          <div className="flex-grow text-gray-600 text-sm mb-4 leading-relaxed">
+            {learnedCount === 0 
+              ? "您還沒有開始任何學習，立即前往學習區開始吧！" 
+              : `您已經學習了 ${learnedCount} 個成語，總題庫共 ${totalIdioms} 個。繼續保持！`}
+          </div>
+          <button 
+            onClick={() => navigateTo('learn')}
+            className="text-red-600 font-bold text-sm hover:underline self-start mt-auto"
+          >
+            立即前往學習區開始吧 !
+          </button>
+        </div>
+
+        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 flex flex-col h-full">
+          <h4 className="text-red-800 font-bold mb-3 text-lg">您的測驗成績</h4>
+          <div className="flex-grow text-gray-600 text-sm mb-4 leading-relaxed">
+             {totalScore === 0 
+              ? "您還沒有參加任何測驗，立即前往文意測驗區開始吧！" 
+              : `您目前累積積分為 ${totalScore} 分。挑戰更高分，登上排行榜！`}
+          </div>
+          <button 
+            onClick={() => navigateTo('quiz')}
+            className="text-red-600 font-bold text-sm hover:underline self-start mt-auto"
+          >
+            立即前往文意測驗區開始吧 !
+          </button>
+        </div>
+
+        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 flex flex-col h-full">
+          <h4 className="text-red-800 font-bold mb-3 text-lg">您的閱讀測驗進度</h4>
+          <div className="flex-grow text-gray-600 text-sm mb-4 leading-relaxed">
+            您還沒有完成任何閱讀測驗，立即前往閱讀測驗區開始吧！(此功能即將推出)
+          </div>
+          <button 
+            className="text-gray-400 font-bold text-sm cursor-not-allowed self-start mt-auto"
+          >
+            即將開放
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// 3. Home Page Component
 const HomePage = ({ navigateTo, user }) => {
   const [scoreLeaders, setScoreLeaders] = useState([]);
   const [learnLeaders, setLearnLeaders] = useState([]);
@@ -96,11 +194,9 @@ const HomePage = ({ navigateTo, user }) => {
         const users = [];
         querySnapshot.forEach((doc) => users.push(doc.data()));
         
-        // Sort for Score
         const byScore = [...users].sort((a, b) => (b.totalScore || 0) - (a.totalScore || 0)).slice(0, 3);
         setScoreLeaders(byScore);
 
-        // Sort for Learned Count
         const byLearned = [...users].sort((a, b) => (b.learnedCount || 0) - (a.learnedCount || 0)).slice(0, 3);
         setLearnLeaders(byLearned);
       } catch (e) {
@@ -114,7 +210,6 @@ const HomePage = ({ navigateTo, user }) => {
 
   return (
     <div className="w-full animate-fade-in">
-      {/* Hero Section */}
       <div className="bg-gray-600 text-white py-16 px-4 text-center">
         <h1 className="text-4xl md:text-5xl font-bold mb-4 tracking-wide">探索中華文化寶藏，成語學習一手掌握</h1>
         <p className="text-lg text-gray-200 mb-8 max-w-2xl mx-auto">
@@ -122,10 +217,10 @@ const HomePage = ({ navigateTo, user }) => {
         </p>
         <div className="flex justify-center gap-4">
           <button 
-            onClick={() => navigateTo('learn')}
+            onClick={() => navigateTo(user ? 'dashboard' : 'login')}
             className="bg-red-800 hover:bg-red-900 text-white font-bold py-3 px-8 rounded shadow-lg transition transform hover:scale-105"
           >
-            開始學習
+            {user ? '進入儀表板' : '開始學習'}
           </button>
           {!user && (
             <button 
@@ -138,13 +233,10 @@ const HomePage = ({ navigateTo, user }) => {
         </div>
       </div>
 
-      {/* Leaderboard Section */}
-      <div className="bg-[#F0FDF4] py-12 px-4"> {/* Light green background like image */}
+      <div className="bg-[#F0FDF4] py-12 px-4">
         <div className="max-w-5xl mx-auto bg-white/50 backdrop-blur-sm rounded-xl p-8 shadow-sm border border-green-100">
           <h2 className="text-2xl font-bold text-center text-red-800 mb-8 tracking-wider">— 學習排行榜 · 前三名 —</h2>
-          
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {/* Left Column: Score */}
             <div>
               <h3 className="text-center font-bold text-red-700 mb-4">文意測驗排行榜 (總分)</h3>
               {loading ? <div className="text-center text-gray-400">載入中...</div> : (
@@ -156,8 +248,6 @@ const HomePage = ({ navigateTo, user }) => {
                 </div>
               )}
             </div>
-
-            {/* Right Column: Learned */}
             <div>
               <h3 className="text-center font-bold text-red-700 mb-4">勤學進度排行榜 (數量)</h3>
               {loading ? <div className="text-center text-gray-400">載入中...</div> : (
@@ -173,7 +263,6 @@ const HomePage = ({ navigateTo, user }) => {
         </div>
       </div>
 
-      {/* Feature Cards */}
       <div className="bg-gray-50 py-16 px-4">
         <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8">
           <div className="bg-white p-8 rounded-lg shadow-md text-center border-t-4 border-blue-500 hover:shadow-xl transition">
@@ -185,7 +274,6 @@ const HomePage = ({ navigateTo, user }) => {
               收錄數百條精選成語，包含拼音、釋義、典故和例句，讓您全方位掌握成語精髓。
             </p>
           </div>
-
           <div className="bg-white p-8 rounded-lg shadow-md text-center border-t-4 border-orange-500 hover:shadow-xl transition">
             <div className="bg-orange-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
               <Edit3 className="text-orange-600 w-8 h-8" />
@@ -195,7 +283,6 @@ const HomePage = ({ navigateTo, user }) => {
               透過有趣的測驗鞏固學習成果，即時回饋，檢驗您的掌握程度，讓學習不枯燥。
             </p>
           </div>
-
           <div className="bg-white p-8 rounded-lg shadow-md text-center border-t-4 border-green-500 hover:shadow-xl transition">
             <div className="bg-green-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
               <TrendingUp className="text-green-600 w-8 h-8" />
@@ -211,7 +298,7 @@ const HomePage = ({ navigateTo, user }) => {
   );
 };
 
-// 3. Auth Page (Standalone)
+// 4. Auth Page (Redirects to dashboard on login)
 const AuthPage = ({ onLoginSuccess }) => {
   const [isRegister, setIsRegister] = useState(false);
   const [email, setEmail] = useState('');
@@ -277,7 +364,7 @@ const AuthPage = ({ onLoginSuccess }) => {
   );
 };
 
-// 4. Existing Components (LearningMode, QuizMode, AdminPanel) - Minimized for brevity but functional
+// 5. Existing Components (LearningMode, QuizMode, AdminPanel)
 const LearningMode = ({ user, idioms, refreshStats }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [learnedIds, setLearnedIds] = useState(new Set());
@@ -308,7 +395,7 @@ const LearningMode = ({ user, idioms, refreshStats }) => {
   };
 
   return (
-    <div className="max-w-3xl mx-auto my-10 px-4">
+    <div className="max-w-3xl mx-auto my-10 px-4 animate-fade-in">
       <div className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
         <div className="bg-red-800 text-white p-4 flex justify-between items-center">
           <h2 className="text-xl font-bold flex items-center gap-2"><BookOpen/> 成語學習卡</h2>
@@ -369,7 +456,7 @@ const QuizMode = ({ user, idioms, refreshStats }) => {
   };
 
   if (finished) return (
-    <div className="max-w-md mx-auto my-10 bg-white p-8 rounded-xl shadow-lg text-center border-t-8 border-red-800">
+    <div className="max-w-md mx-auto my-10 bg-white p-8 rounded-xl shadow-lg text-center border-t-8 border-red-800 animate-fade-in">
       <Trophy className="w-20 h-20 mx-auto text-yellow-500 mb-4" />
       <h2 className="text-2xl font-bold text-gray-800">測驗結束</h2>
       <p className="text-5xl font-bold text-red-700 my-6">{score} 分</p>
@@ -378,7 +465,7 @@ const QuizMode = ({ user, idioms, refreshStats }) => {
   );
 
   if (playing && q) return (
-    <div className="max-w-2xl mx-auto my-10 bg-white p-6 rounded-xl shadow-lg border border-gray-200">
+    <div className="max-w-2xl mx-auto my-10 bg-white p-6 rounded-xl shadow-lg border border-gray-200 animate-fade-in">
       <div className="flex justify-between mb-4 text-gray-500 font-bold"><span>第 {count} / 5 題</span><span>得分: {score}</span></div>
       <div className="bg-gray-100 p-6 rounded-lg mb-6 text-lg text-gray-800 font-medium">"{q.meaning}"</div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -390,7 +477,7 @@ const QuizMode = ({ user, idioms, refreshStats }) => {
   );
 
   return (
-    <div className="max-w-2xl mx-auto my-16 text-center">
+    <div className="max-w-2xl mx-auto my-16 text-center animate-fade-in">
       <div className="bg-white p-10 rounded-2xl shadow-xl border border-gray-200">
         <Brain className="w-20 h-20 mx-auto text-red-800 mb-6" />
         <h2 className="text-3xl font-bold text-gray-800 mb-4">成語大挑戰</h2>
@@ -401,7 +488,7 @@ const QuizMode = ({ user, idioms, refreshStats }) => {
   );
 };
 
-// 5. Admin Panel (Same as before)
+// 6. Admin Panel (Same as before)
 const AdminPanel = ({ idioms, refreshIdioms }) => {
   const [jsonMode, setJsonMode] = useState(false);
   const [jsonInput, setJsonInput] = useState('');
@@ -437,7 +524,7 @@ const AdminPanel = ({ idioms, refreshIdioms }) => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto my-10 bg-white p-6 rounded shadow">
+    <div className="max-w-4xl mx-auto my-10 bg-white p-6 rounded shadow animate-fade-in">
       <div className="flex justify-between mb-4">
         <h2 className="font-bold text-xl">後台管理</h2>
         <div>
@@ -468,7 +555,7 @@ const AdminPanel = ({ idioms, refreshIdioms }) => {
 // --- Main App Component ---
 export default function App() {
   const [user, setUser] = useState(null);
-  const [view, setView] = useState('home'); // home, learn, quiz, login, admin
+  const [view, setView] = useState('home'); // home, dashboard, learn, quiz, login, admin
   const [loading, setLoading] = useState(true);
   const [idioms, setIdioms] = useState([]);
   const [userStats, setUserStats] = useState({});
@@ -482,7 +569,9 @@ export default function App() {
     initAuth();
     const unsub = onAuthStateChanged(auth, u => {
       setUser(u); setLoading(false);
-      if (u) fetchStats(u.uid);
+      if (u) {
+        fetchStats(u.uid);
+      }
     });
     fetchIdioms();
     return () => unsub();
@@ -501,11 +590,16 @@ export default function App() {
   };
 
   const navigateTo = (target) => {
-    if ((target === 'learn' || target === 'quiz') && !user) {
+    if ((target === 'learn' || target === 'quiz' || target === 'dashboard') && !user) {
       setView('login');
     } else {
       setView(target);
     }
+  };
+
+  const handleLoginSuccess = () => {
+    // 登入成功後，直接跳轉到儀表板
+    setView('dashboard');
   };
 
   const isAdmin = user && ADMIN_EMAILS.includes(user.email);
@@ -531,6 +625,11 @@ export default function App() {
           {/* Navigation Links */}
           <nav className="flex items-center gap-1 md:gap-6 text-sm font-medium">
             <button onClick={() => setView('home')} className={`px-3 py-2 rounded hover:bg-red-700 transition ${view === 'home' ? 'bg-red-900' : ''}`}>首頁</button>
+            {user && (
+              <button onClick={() => setView('dashboard')} className={`px-3 py-2 rounded hover:bg-red-700 transition flex items-center gap-1 ${view === 'dashboard' ? 'bg-red-900' : ''}`}>
+                <LayoutDashboard size={16}/> 個人儀表板
+              </button>
+            )}
             <button onClick={() => navigateTo('learn')} className={`px-3 py-2 rounded hover:bg-red-700 transition ${view === 'learn' ? 'bg-red-900' : ''}`}>成語學習區</button>
             <button onClick={() => navigateTo('quiz')} className={`px-3 py-2 rounded hover:bg-red-700 transition ${view === 'quiz' ? 'bg-red-900' : ''}`}>互動測驗</button>
             
@@ -540,7 +639,7 @@ export default function App() {
                   <p className="text-xs text-red-200">歡迎回來</p>
                   <p className="font-bold">{user.displayName}</p>
                 </div>
-                <button onClick={() => signOut(auth)} className="bg-red-900 hover:bg-red-950 p-2 rounded text-xs">登出</button>
+                <button onClick={() => { signOut(auth); setView('home'); }} className="bg-red-900 hover:bg-red-950 p-2 rounded text-xs">登出</button>
               </div>
             ) : (
               <button onClick={() => setView('login')} className="ml-2 bg-white text-red-800 px-4 py-2 rounded font-bold hover:bg-gray-100 transition">
@@ -554,7 +653,8 @@ export default function App() {
       {/* 2. Main Content Area */}
       <main className="flex-grow">
         {view === 'home' && <HomePage navigateTo={navigateTo} user={user} />}
-        {view === 'login' && <AuthPage onLoginSuccess={() => setView('home')} />}
+        {view === 'login' && <AuthPage onLoginSuccess={handleLoginSuccess} />}
+        {view === 'dashboard' && <Dashboard user={user} userStats={userStats} idioms={idioms} navigateTo={navigateTo} />}
         {view === 'learn' && <LearningMode user={user} idioms={idioms} refreshStats={() => fetchStats(user.uid)} />}
         {view === 'quiz' && <QuizMode user={user} idioms={idioms} refreshStats={() => fetchStats(user.uid)} />}
         {view === 'admin' && isAdmin && <AdminPanel idioms={idioms} refreshIdioms={fetchIdioms} />}
