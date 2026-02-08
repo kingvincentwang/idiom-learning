@@ -341,7 +341,7 @@ const ReadingMode = ({ user, readingMaterials, refreshStats }) => {
   const [finished, setFinished] = useState(false);
   const [selectedOption, setSelectedOption] = useState(null);
   const [isCorrect, setIsCorrect] = useState(null);
-  const [completedStories, setCompletedStories] = useState(new Set()); // New state for history
+  const [completedStories, setCompletedStories] = useState(new Set()); 
 
   // Auto-fetch history
   useEffect(() => {
@@ -356,7 +356,7 @@ const ReadingMode = ({ user, readingMaterials, refreshStats }) => {
       } catch (e) { console.error(e); }
     };
     fetchHistory();
-  }, [user, finished]); // Refresh when user changes or quiz finishes
+  }, [user, finished]);
 
   if (!readingMaterials || readingMaterials.length === 0) return <div className="p-10 text-center"><Loader2 className="animate-spin inline mr-2"/>閱讀教材載入中... (請至後台匯入)</div>;
 
@@ -368,16 +368,16 @@ const ReadingMode = ({ user, readingMaterials, refreshStats }) => {
           {readingMaterials.map((item, idx) => {
             const isDone = completedStories.has(item.title);
             return (
-              <div key={idx} className={`bg-white p-8 rounded-2xl shadow-sm border border-gray-200 hover:shadow-xl transition group cursor-pointer ${isDone ? 'bg-green-50/30' : ''}`} onClick={() => { setSelectedStory(item); setCurrentQIndex(0); setScore(0); setFinished(false); setSelectedOption(null); setIsCorrect(null); }}>
+              <div key={idx} className={`bg-white p-8 rounded-2xl shadow-sm border border-gray-200 hover:shadow-xl transition group cursor-pointer ${isDone ? 'bg-green-50/30 ring-1 ring-green-200' : ''}`} onClick={() => { setSelectedStory(item); setCurrentQIndex(0); setScore(0); setFinished(false); setSelectedOption(null); setIsCorrect(null); }}>
                 <div className="flex justify-between items-start mb-4">
                   <div className="flex items-center gap-2">
                     <h3 className="text-2xl font-bold text-gray-800 group-hover:text-red-800 transition">{item.title}</h3>
-                    {isDone && <span className="bg-green-100 text-green-700 text-xs px-2 py-1 rounded-full font-bold flex items-center gap-1"><CheckCircle size={12}/> 已測驗</span>}
+                    {isDone && <span className="bg-green-100 text-green-700 text-xs px-2 py-1 rounded-full font-bold flex items-center gap-1 shadow-sm"><CheckCircle size={12}/> 已測驗</span>}
                   </div>
                   <span className="bg-red-100 text-red-800 text-xs px-2 py-1 rounded-full">5 題</span>
                 </div>
                 <p className="text-gray-500 text-base mb-6 line-clamp-3 leading-relaxed">{item.content}</p>
-                <button className={`w-full py-3 rounded-xl font-bold transition ${isDone ? 'bg-green-600 text-white hover:bg-green-700' : 'bg-gray-50 text-gray-600 group-hover:bg-red-800 group-hover:text-white'}`}>
+                <button className={`w-full py-3 rounded-xl font-bold transition ${isDone ? 'bg-green-600 text-white hover:bg-green-700 shadow-md' : 'bg-gray-50 text-gray-600 group-hover:bg-red-800 group-hover:text-white'}`}>
                   {isDone ? '再次挑戰' : '立即閱讀並挑戰'}
                 </button>
               </div>
@@ -561,14 +561,14 @@ const AdminPanel = ({ idioms, readingMaterials, refreshIdioms, refreshReading })
               <span>成語庫 ({idioms.length})</span>
               <span className="text-xs bg-white border px-2 py-1 rounded text-gray-500">word</span>
             </h3>
-            <div className="p-2 space-y-1 bg-white">
+            <div className="p-2 bg-white grid grid-cols-2 gap-2">
               {idioms.map(i => (
-                <div key={i.id} className="flex justify-between items-center p-3 hover:bg-gray-50 rounded-lg group border border-transparent hover:border-gray-100 transition">
-                  <span className="font-medium text-gray-800">{i.word}</span>
-                  <button onClick={()=>delIdiom(i.id)} className="text-gray-300 hover:text-red-500 transition p-1"><Trash2 size={16}/></button>
+                <div key={i.id} className="flex justify-between items-center p-2 hover:bg-gray-50 rounded-lg group border border-transparent hover:border-gray-100 transition bg-gray-50/50">
+                  <span className="font-medium text-gray-800 text-sm">{i.word}</span>
+                  <button onClick={()=>delIdiom(i.id)} className="text-gray-300 hover:text-red-500 transition p-1 flex-shrink-0"><Trash2 size={14}/></button>
                 </div>
               ))}
-              {idioms.length === 0 && <div className="p-4 flex items-center justify-center text-gray-400 text-sm">無資料</div>}
+              {idioms.length === 0 && <div className="p-4 col-span-2 flex items-center justify-center text-gray-400 text-sm">無資料</div>}
             </div>
           </div>
           <div className="flex flex-col border border-gray-200 rounded-xl overflow-hidden shadow-sm h-full">
@@ -576,14 +576,14 @@ const AdminPanel = ({ idioms, readingMaterials, refreshIdioms, refreshReading })
               <span>閱讀測驗庫 ({readingMaterials?.length || 0})</span>
               <span className="text-xs bg-white border px-2 py-1 rounded text-gray-500">title</span>
             </h3>
-            <div className="p-2 space-y-1 bg-white">
+            <div className="p-2 bg-white grid grid-cols-2 gap-2">
               {readingMaterials?.map(i => (
-                <div key={i.id} className="flex justify-between items-center p-3 hover:bg-gray-50 rounded-lg group border border-transparent hover:border-gray-100 transition">
-                  <span className="font-medium text-gray-800 truncate max-w-[200px]">{i.title}</span>
-                  <button onClick={()=>delReading(i.id)} className="text-gray-300 hover:text-red-500 transition p-1"><Trash2 size={16}/></button>
+                <div key={i.id} className="flex justify-between items-center p-2 hover:bg-gray-50 rounded-lg group border border-transparent hover:border-gray-100 transition bg-gray-50/50">
+                  <span className="font-medium text-gray-800 truncate text-sm" title={i.title}>{i.title}</span>
+                  <button onClick={()=>delReading(i.id)} className="text-gray-300 hover:text-red-500 transition p-1 flex-shrink-0"><Trash2 size={14}/></button>
                 </div>
               ))}
-              {(!readingMaterials || readingMaterials.length === 0) && <div className="p-4 flex items-center justify-center text-gray-400 text-sm">無資料</div>}
+              {(!readingMaterials || readingMaterials.length === 0) && <div className="p-4 col-span-2 flex items-center justify-center text-gray-400 text-sm">無資料</div>}
             </div>
           </div>
         </div>
@@ -691,7 +691,7 @@ export default function App() {
       </main>
 
       <footer className="bg-gray-800 text-gray-400 py-8 text-center text-sm">
-        <div className="max-w-6xl mx-auto px-4"><p className="mb-2">© 2026 成語學習網. All rights reserved.</p><span onClick={() => setView('admin')} className="text-gray-600 hover:text-white cursor-pointer">管理員後台</span></>}</div></div>
+        <div className="max-w-6xl mx-auto px-4"><p className="mb-2">© 2026 成語狀元榜學習網. All rights reserved.</p><div className="flex justify-center gap-4"><span className="hover:text-white cursor-pointer">隱私權政策</span><span>|</span><span className="hover:text-white cursor-pointer">使用條款</span>{isAdmin && <><span>|</span><span onClick={() => setView('admin')} className="text-gray-600 hover:text-white cursor-pointer">管理員後台</span></>}</div></div>
       </footer>
     </div>
   );
