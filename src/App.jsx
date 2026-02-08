@@ -691,7 +691,7 @@ export default function App() {
       </main>
 
       <footer className="bg-gray-800 text-gray-400 py-8 text-center text-sm">
-        <div className="max-w-6xl mx-auto px-4"><p className="mb-2">© 2026 成語狀元榜學習網. All rights reserved.</p><div className="flex justify-center gap-4"><span className="hover:text-white cursor-pointer">隱私權政策</span><span>|</span><span className="hover:text-white cursor-pointer">使用條款</span>{isAdmin && <><span>|</span><span onClick={() => setView('admin')} className="text-gray-600 hover:text-white cursor-pointer">管理員後台</span></>}</div></div>
+        <div className="max-w-6xl mx-auto px-4"><p className="mb-2">© 2026 成語學習網. All rights reserved.</p><span onClick={() => setView('admin')} className="text-gray-600 hover:text-white cursor-pointer">管理員後台</span></>}</div></div>
       </footer>
     </div>
   );
