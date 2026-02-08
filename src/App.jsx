@@ -651,8 +651,8 @@ export default function App() {
               <BookOpen size={24} />
             </div>
             <div>
-              <h1 className="text-2xl font-bold tracking-widest">成語狀元榜</h1>
-              <p className="text-xs text-red-200 tracking-wider">Idiom Learning Platform</p>
+              <h1 className="text-2xl font-bold tracking-widest">關西國小成語學習網</h1>
+              <p className="text-xs text-red-200 tracking-wider">成語自學及測驗平台</p>
             </div>
           </div>
 
