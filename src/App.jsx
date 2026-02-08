@@ -26,7 +26,7 @@ import {
 import { 
   BookOpen, Trophy, User, LogOut, CheckCircle, Brain, 
   BarChart3, Mail, Lock, Loader2, AlertCircle, Plus, Trash2, Settings, ShieldAlert, FileJson,
-  Library, Edit3, TrendingUp, Home, LayoutDashboard, XCircle, ExternalLink, Book, List
+  Library, Edit3, TrendingUp, Home, LayoutDashboard, XCircle, ExternalLink, Book, List, ChevronRight
 } from 'lucide-react';
 
 // --- Firebase Configuration ---
@@ -92,10 +92,18 @@ const INITIAL_READING_DATA = [
 // --- Components ---
 
 const LeaderboardItem = ({ rank, name, score, unit = '分', highlight = false }) => (
-  <div className={`flex items-center p-3 rounded-lg mb-2 ${highlight ? 'bg-orange-50 border border-orange-200' : 'bg-white border border-gray-100'}`}>
-    <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm mr-3 text-white ${rank === 1 ? 'bg-yellow-400' : rank === 2 ? 'bg-gray-400' : 'bg-orange-400'}`}>{rank}</div>
-    <div className="flex-1"><p className="font-bold text-gray-700 text-sm">{name || '無名氏'}</p></div>
-    <div className="font-mono font-bold text-red-700">{score} <span className="text-xs text-gray-500 font-normal">{unit}</span></div>
+  <div className={`flex items-center p-3 rounded-lg mb-2 shadow-sm transition-all ${highlight ? 'bg-orange-50 border border-orange-200 transform scale-[1.02]' : 'bg-white border border-gray-100 hover:bg-gray-50'}`}>
+    <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm mr-3 text-white shadow-sm
+      ${rank === 1 ? 'bg-gradient-to-br from-yellow-400 to-yellow-500' : rank === 2 ? 'bg-gradient-to-br from-gray-300 to-gray-400' : rank === 3 ? 'bg-gradient-to-br from-orange-400 to-orange-500' : 'bg-gray-200 text-gray-500'}
+    `}>
+      {rank}
+    </div>
+    <div className="flex-1">
+      <p className="font-bold text-gray-700 text-sm">{name || '無名氏'}</p>
+    </div>
+    <div className="font-mono font-bold text-red-700">
+      {score} <span className="text-xs text-gray-500 font-normal">{unit}</span>
+    </div>
   </div>
 );
 
@@ -111,40 +119,59 @@ const Dashboard = ({ user, userStats, idioms, navigateTo }) => {
   const readingPct = Math.min(100, Math.round((readingScore / readingGoal) * 100));
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8 animate-fade-in">
-      <h2 className="text-2xl font-bold text-gray-800 mb-6 border-l-4 border-red-800 pl-4">個人學習儀表板</h2>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-          <h3 className="text-red-800 font-bold mb-6 text-center text-lg">成語學習進度</h3>
-          <div className="w-full bg-gray-200 rounded-full h-4 mb-4 overflow-hidden"><div className="bg-red-600 h-4 rounded-full transition-all duration-1000 ease-out" style={{ width: `${learnedPct}%` }}></div></div>
-          <p className="text-center text-gray-600 font-bold text-xl">{learnedPct}%</p>
-        </div>
-        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-          <h3 className="text-red-800 font-bold mb-6 text-center text-lg">文意測驗進度 (目標: {scoreGoal})</h3>
-          <div className="w-full bg-gray-200 rounded-full h-4 mb-4 overflow-hidden"><div className="bg-red-600 h-4 rounded-full transition-all duration-1000 ease-out" style={{ width: `${scorePct}%` }}></div></div>
-          <p className="text-center text-gray-600 font-bold text-xl">{scorePct}%</p>
-        </div>
-        <div className="bg-white p-6 rounded-lg shadow-sm border border-red-200 ring-2 ring-red-50">
-          <h3 className="text-red-800 font-bold mb-6 text-center text-lg">閱讀測驗進度 (目標: {readingGoal})</h3>
-          <div className="w-full bg-gray-200 rounded-full h-4 mb-4 overflow-hidden"><div className="bg-red-600 h-4 rounded-full transition-all duration-1000 ease-out" style={{ width: `${readingPct}%` }}></div></div>
-          <p className="text-center text-gray-600 font-bold text-xl">{readingPct}%</p>
-        </div>
+    <div className="max-w-6xl mx-auto px-4 py-8 animate-fade-in">
+      <div className="flex items-center gap-3 mb-8 pb-4 border-b border-gray-200">
+        <LayoutDashboard className="text-red-800 w-8 h-8" />
+        <h2 className="text-2xl font-bold text-gray-800">個人學習儀表板</h2>
       </div>
+      
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+        {/* Progress Cards */}
+        {[
+          { title: "成語學習進度", pct: learnedPct, color: "bg-blue-600", text: "text-blue-600" },
+          { title: "文意測驗進度", pct: scorePct, color: "bg-red-600", text: "text-red-600", sub: `(目標: ${scoreGoal}分)` },
+          { title: "閱讀測驗進度", pct: readingPct, color: "bg-green-600", text: "text-green-600", sub: `(目標: ${readingGoal}分)` }
+        ].map((item, idx) => (
+          <div key={idx} className="bg-white p-6 rounded-xl shadow-sm border border-gray-200 flex flex-col items-center">
+            <h3 className="text-gray-700 font-bold mb-1 text-lg">{item.title}</h3>
+            {item.sub && <span className="text-xs text-gray-400 mb-4">{item.sub}</span>}
+            <div className="relative w-32 h-32 flex items-center justify-center mb-2">
+              <svg className="w-full h-full transform -rotate-90">
+                <circle cx="64" cy="64" r="56" stroke="currentColor" strokeWidth="12" fill="transparent" className="text-gray-100" />
+                <circle cx="64" cy="64" r="56" stroke="currentColor" strokeWidth="12" fill="transparent" 
+                  strokeDasharray={351.86} strokeDashoffset={351.86 - (351.86 * item.pct) / 100} 
+                  className={`${item.text} transition-all duration-1000 ease-out`} strokeLinecap="round" 
+                />
+              </svg>
+              <span className={`absolute text-3xl font-bold ${item.text}`}>{item.pct}%</span>
+            </div>
+          </div>
+        ))}
+      </div>
+
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 flex flex-col h-full">
-          <h4 className="text-red-800 font-bold mb-3 text-lg">您的學習進度</h4>
-          <div className="flex-grow text-gray-600 text-sm mb-4 leading-relaxed">{learnedCount === 0 ? "您還沒有開始任何學習，立即前往學習區開始吧！" : `您已經學習了 ${learnedCount} 個成語，總題庫共 ${totalIdioms} 個。`}</div>
-          <button onClick={() => navigateTo('learn')} className="text-red-600 font-bold text-sm hover:underline self-start mt-auto">立即前往學習區</button>
+        <div className="bg-white p-6 rounded-xl shadow-md border-l-4 border-blue-500 hover:shadow-lg transition">
+          <h4 className="text-blue-800 font-bold mb-3 text-lg flex items-center gap-2"><BookOpen size={20}/> 學習進度</h4>
+          <p className="text-gray-600 text-sm mb-6 min-h-[40px]">
+            {learnedCount === 0 ? "尚未開始學習，千里之行始於足下！" : `已學習 ${learnedCount} 個成語，總題庫 ${totalIdioms} 個。`}
+          </p>
+          <button onClick={() => navigateTo('learn')} className="w-full py-2 rounded-lg bg-blue-50 text-blue-700 font-bold hover:bg-blue-100 transition">前往學習區</button>
         </div>
-        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 flex flex-col h-full">
-          <h4 className="text-red-800 font-bold mb-3 text-lg">您的文意測驗</h4>
-          <div className="flex-grow text-gray-600 text-sm mb-4 leading-relaxed">{totalScore === 0 ? "您還沒有參加任何測驗，立即前往文意測驗區開始吧！" : `文意測驗累積積分：${totalScore} 分。`}</div>
-          <button onClick={() => navigateTo('quiz')} className="text-red-600 font-bold text-sm hover:underline self-start mt-auto">立即前往文意測驗</button>
+
+        <div className="bg-white p-6 rounded-xl shadow-md border-l-4 border-red-500 hover:shadow-lg transition">
+          <h4 className="text-red-800 font-bold mb-3 text-lg flex items-center gap-2"><Edit3 size={20}/> 文意測驗</h4>
+          <p className="text-gray-600 text-sm mb-6 min-h-[40px]">
+             {totalScore === 0 ? "尚未參加測驗，快來挑戰自己！" : `目前累積積分：${totalScore} 分。繼續加油！`}
+          </p>
+          <button onClick={() => navigateTo('quiz')} className="w-full py-2 rounded-lg bg-red-50 text-red-700 font-bold hover:bg-red-100 transition">前往測驗區</button>
         </div>
-        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 flex flex-col h-full">
-          <h4 className="text-red-800 font-bold mb-3 text-lg">您的閱讀測驗</h4>
-          <div className="flex-grow text-gray-600 text-sm mb-4 leading-relaxed">{readingScore === 0 ? "您還沒有完成任何閱讀測驗，立即前往挑戰！" : `閱讀測驗累積積分：${readingScore} 分。`}</div>
-          <button onClick={() => navigateTo('reading')} className="text-red-600 font-bold text-sm hover:underline self-start mt-auto">立即前往閱讀測驗</button>
+
+        <div className="bg-white p-6 rounded-xl shadow-md border-l-4 border-green-500 hover:shadow-lg transition">
+          <h4 className="text-green-800 font-bold mb-3 text-lg flex items-center gap-2"><Book size={20}/> 閱讀測驗</h4>
+          <p className="text-gray-600 text-sm mb-6 min-h-[40px]">
+            {readingScore === 0 ? "尚未完成閱讀測驗，透過故事學成語！" : `閱讀測驗積分：${readingScore} 分。`}
+          </p>
+          <button onClick={() => navigateTo('reading')} className="w-full py-2 rounded-lg bg-green-50 text-green-700 font-bold hover:bg-green-100 transition">前往閱讀區</button>
         </div>
       </div>
     </div>
@@ -171,30 +198,41 @@ const HomePage = ({ navigateTo, user }) => {
 
   return (
     <div className="w-full animate-fade-in">
-      <div className="bg-gray-600 text-white py-16 px-4 text-center">
-        <h1 className="text-4xl md:text-5xl font-bold mb-4 tracking-wide">探索中華文化寶藏，成語學習一手掌握</h1>
-        <p className="text-lg text-gray-200 mb-8 max-w-2xl mx-auto">透過我們的平台，輕鬆學習成語典故，增進語文能力，挑戰自我極限。</p>
-        <div className="flex justify-center gap-4">
-          <button onClick={() => navigateTo(user ? 'dashboard' : 'login')} className="bg-red-800 hover:bg-red-900 text-white font-bold py-3 px-8 rounded shadow-lg transition transform hover:scale-105">{user ? '進入儀表板' : '開始學習'}</button>
-          {!user && <button onClick={() => navigateTo('login')} className="bg-transparent border-2 border-white hover:bg-white hover:text-gray-800 text-white font-bold py-3 px-8 rounded transition">立即註冊</button>}
+      <div className="bg-gradient-to-br from-red-900 to-red-800 text-white py-24 px-4 text-center relative overflow-hidden">
+        <div className="absolute top-0 left-0 w-full h-full opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
+        <div className="relative z-10 max-w-4xl mx-auto">
+          <h1 className="text-4xl md:text-6xl font-bold mb-6 tracking-wide drop-shadow-md">探索中華文化寶藏</h1>
+          <p className="text-xl text-red-100 mb-10 tracking-wider">成語學習一手掌握 · 增進語文核心素養</p>
+          <div className="flex justify-center gap-6">
+            <button onClick={() => navigateTo(user ? 'dashboard' : 'login')} className="bg-white text-red-900 font-bold py-3 px-10 rounded-full shadow-lg transition transform hover:scale-105 hover:bg-gray-100">
+              {user ? '進入儀表板' : '開始學習'}
+            </button>
+            {!user && <button onClick={() => navigateTo('login')} className="bg-transparent border-2 border-white text-white font-bold py-3 px-10 rounded-full transition hover:bg-white/10">立即註冊</button>}
+          </div>
         </div>
       </div>
-      <div className="bg-[#F0FDF4] py-12 px-4">
-        <div className="max-w-5xl mx-auto bg-white/50 backdrop-blur-sm rounded-xl p-8 shadow-sm border border-green-100">
-          <h2 className="text-2xl font-bold text-center text-red-800 mb-8 tracking-wider">— 學習排行榜 · 前三名 —</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div>
-              <h3 className="text-center font-bold text-red-700 mb-4">文意測驗排行榜 (總分)</h3>
-              {loading ? <div className="text-center text-gray-400">載入中...</div> : <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100 min-h-[200px]">{scoreLeaders.map((u, i) => <LeaderboardItem key={i} rank={i+1} name={u.displayName} score={u.totalScore || 0} unit="分" highlight={user && u.uid === user.uid} />)}{scoreLeaders.length === 0 && <p className="text-center text-gray-400 mt-10">尚無資料</p>}</div>}
+
+      <div className="bg-[#F9FAFB] py-16 px-4">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-gray-800 inline-block border-b-4 border-red-800 pb-2">榮譽榜單</h2>
+            <p className="text-gray-500 mt-4">看看誰是今天的成語狀元！</p>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+            <div className="bg-white p-6 rounded-2xl shadow-md border border-gray-100">
+              <h3 className="text-center font-bold text-red-800 mb-6 text-xl bg-red-50 py-2 rounded-lg">文意測驗排行</h3>
+              {loading ? <div className="text-center py-10 text-gray-400">載入中...</div> : 
+               <div className="min-h-[200px]">{scoreLeaders.map((u, i) => <LeaderboardItem key={i} rank={i+1} name={u.displayName} score={u.totalScore || 0} unit="分" highlight={user && u.uid === user.uid} />)}{scoreLeaders.length === 0 && <p className="text-center text-gray-400 mt-10">尚無資料</p>}</div>}
             </div>
-            <div>
-              <h3 className="text-center font-bold text-red-700 mb-4">閱讀測驗排行榜 (總分)</h3>
-              {loading ? <div className="text-center text-gray-400">載入中...</div> : <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100 min-h-[200px]">{readingLeaders.map((u, i) => <LeaderboardItem key={i} rank={i+1} name={u.displayName} score={u.readingScore || 0} unit="分" highlight={user && u.uid === user.uid} />)}{readingLeaders.length === 0 && <p className="text-center text-gray-400 mt-10">尚無資料</p>}</div>}
+            <div className="bg-white p-6 rounded-2xl shadow-md border border-gray-100">
+              <h3 className="text-center font-bold text-blue-800 mb-6 text-xl bg-blue-50 py-2 rounded-lg">閱讀測驗排行</h3>
+              {loading ? <div className="text-center py-10 text-gray-400">載入中...</div> : 
+               <div className="min-h-[200px]">{readingLeaders.map((u, i) => <LeaderboardItem key={i} rank={i+1} name={u.displayName} score={u.readingScore || 0} unit="分" highlight={user && u.uid === user.uid} />)}{readingLeaders.length === 0 && <p className="text-center text-gray-400 mt-10">尚無資料</p>}</div>}
             </div>
           </div>
         </div>
       </div>
-      {/* Feature cards omitted for brevity, same as before */}
     </div>
   );
 };
@@ -221,18 +259,16 @@ const AuthPage = ({ onLoginSuccess }) => {
 
   return (
     <div className="min-h-[80vh] flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8 bg-white p-10 rounded-xl shadow-lg border border-gray-200">
-        <div className="text-center"><div className="mx-auto h-12 w-12 bg-red-100 rounded-full flex items-center justify-center"><Lock className="h-6 w-6 text-red-800" /></div><h2 className="mt-6 text-3xl font-extrabold text-gray-900">{isRegister ? '註冊新帳號' : '登入您的帳號'}</h2></div>
-        {error && <div className="bg-red-50 text-red-600 p-3 rounded text-sm">{error}</div>}
-        <form className="mt-8 space-y-6" onSubmit={handleAuth}>
-          <div className="rounded-md shadow-sm -space-y-px">
-            {isRegister && <input type="text" required className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-red-500 focus:border-red-500 focus:z-10 sm:text-sm" placeholder="暱稱" value={username} onChange={e => setUsername(e.target.value)} />}
-            <input type="email" required className={`appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 ${!isRegister ? 'rounded-t-md' : ''} focus:outline-none focus:ring-red-500 focus:border-red-500 focus:z-10 sm:text-sm`} placeholder="Email" value={email} onChange={e => setEmail(e.target.value)} />
-            <input type="password" required className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-red-500 focus:border-red-500 focus:z-10 sm:text-sm" placeholder="密碼" value={password} onChange={e => setPassword(e.target.value)} />
-          </div>
-          <button type="submit" disabled={loading} className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-red-800 hover:bg-red-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">{loading ? '處理中...' : (isRegister ? '註冊' : '登入')}</button>
+      <div className="max-w-md w-full space-y-8 bg-white p-10 rounded-2xl shadow-xl border border-gray-200">
+        <div className="text-center"><div className="mx-auto h-16 w-16 bg-red-50 rounded-full flex items-center justify-center mb-4"><Lock className="h-8 w-8 text-red-800" /></div><h2 className="text-3xl font-extrabold text-gray-900">{isRegister ? '註冊新帳號' : '歡迎回來'}</h2><p className="mt-2 text-sm text-gray-600">開啟您的成語學習之旅</p></div>
+        {error && <div className="bg-red-50 text-red-600 p-3 rounded text-sm flex items-center gap-2"><AlertCircle size={16}/>{error}</div>}
+        <form className="mt-8 space-y-5" onSubmit={handleAuth}>
+          {isRegister && <div><label className="block text-sm font-medium text-gray-700">暱稱</label><input type="text" required className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-400 text-gray-900 rounded-md focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm" value={username} onChange={e => setUsername(e.target.value)} /></div>}
+          <div><label className="block text-sm font-medium text-gray-700">Email</label><input type="email" required className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-400 text-gray-900 rounded-md focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm" value={email} onChange={e => setEmail(e.target.value)} /></div>
+          <div><label className="block text-sm font-medium text-gray-700">密碼</label><input type="password" required className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-400 text-gray-900 rounded-md focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm" value={password} onChange={e => setPassword(e.target.value)} /></div>
+          <button type="submit" disabled={loading} className="w-full flex justify-center py-2.5 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-red-800 hover:bg-red-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 shadow-md transition">{loading ? '處理中...' : (isRegister ? '註冊' : '登入')}</button>
         </form>
-        <div className="text-center"><button onClick={() => setIsRegister(!isRegister)} className="font-medium text-red-800 hover:text-red-700">{isRegister ? '已有帳號？登入' : '還沒有帳號？註冊'}</button></div>
+        <div className="text-center"><button onClick={() => setIsRegister(!isRegister)} className="font-medium text-red-800 hover:text-red-700 text-sm">{isRegister ? '已有帳號？登入' : '還沒有帳號？註冊'}</button></div>
       </div>
     </div>
   );
@@ -269,21 +305,21 @@ const LearningMode = ({ user, idioms, refreshStats }) => {
 
   return (
     <div className="max-w-3xl mx-auto my-10 px-4 animate-fade-in">
-      <div className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
-        <div className="bg-red-800 text-white p-4 flex justify-between items-center"><h2 className="text-xl font-bold flex items-center gap-2"><BookOpen/> 成語學習卡</h2><span className="bg-red-900 px-3 py-1 rounded text-sm">進度: {learnedIds.size} / {idioms.length}</span></div>
-        <div className="p-8 text-center bg-gray-50">
-          {isLearned && <div className="text-green-600 text-sm font-bold mb-2 flex justify-center items-center gap-1"><CheckCircle size={16}/> 已收藏</div>}
-          <h1 className="text-5xl font-bold text-gray-800 mb-2">{current.word}</h1>
-          <p className="text-xl text-gray-500 font-serif mb-6">{current.pinyin}</p>
-          <div className="text-left space-y-4 max-w-xl mx-auto">
-            <div className="bg-white p-4 rounded border-l-4 border-amber-400 shadow-sm"><span className="font-bold text-amber-600 block mb-1">釋義</span><p className="text-gray-700">{current.meaning}</p></div>
-            <div className="bg-white p-4 rounded border-l-4 border-blue-400 shadow-sm"><span className="font-bold text-blue-600 block mb-1">例句</span><p className="text-gray-700">{current.example || "暫無例句"}</p></div>
+      <div className="bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden">
+        <div className="bg-gradient-to-r from-red-800 to-red-700 text-white p-6 flex justify-between items-center"><h2 className="text-2xl font-bold flex items-center gap-2"><BookOpen/> 成語學習卡</h2><span className="bg-white/20 px-4 py-1 rounded-full text-sm font-bold backdrop-blur-sm">進度: {learnedIds.size} / {idioms.length}</span></div>
+        <div className="p-10 text-center bg-gray-50/50">
+          {isLearned && <div className="inline-flex items-center gap-1 text-green-600 bg-green-100 px-3 py-1 rounded-full text-sm font-bold mb-4 shadow-sm"><CheckCircle size={16}/> 已收藏</div>}
+          <h1 className="text-6xl font-extrabold text-gray-800 mb-2 tracking-widest">{current.word}</h1>
+          <p className="text-2xl text-gray-500 font-serif mb-8">{current.pinyin}</p>
+          <div className="text-left space-y-6 max-w-xl mx-auto">
+            <div className="bg-white p-5 rounded-lg border-l-4 border-amber-400 shadow-sm"><span className="font-bold text-amber-600 block mb-2 uppercase text-xs tracking-wider">釋義 Definition</span><p className="text-gray-700 text-lg leading-relaxed">{current.meaning}</p></div>
+            <div className="bg-white p-5 rounded-lg border-l-4 border-blue-400 shadow-sm"><span className="font-bold text-blue-600 block mb-2 uppercase text-xs tracking-wider">例句 Example</span><p className="text-gray-700 text-lg leading-relaxed">{current.example || "暫無例句"}</p></div>
           </div>
         </div>
-        <div className="bg-gray-100 p-4 flex justify-between">
-          <button onClick={() => setCurrentIndex((currentIndex - 1 + idioms.length) % idioms.length)} className="text-gray-600 hover:text-gray-900 font-bold px-4">上一則</button>
-          <button onClick={markLearned} disabled={isLearned} className={`px-6 py-2 rounded shadow font-bold text-white transition ${isLearned ? 'bg-gray-400' : 'bg-red-700 hover:bg-red-800'}`}>{isLearned ? '已學習' : '標記為已學'}</button>
-          <button onClick={() => setCurrentIndex((currentIndex + 1) % idioms.length)} className="text-gray-600 hover:text-gray-900 font-bold px-4">下一則</button>
+        <div className="bg-white p-6 border-t border-gray-100 flex justify-between items-center">
+          <button onClick={() => setCurrentIndex((currentIndex - 1 + idioms.length) % idioms.length)} className="flex items-center gap-2 text-gray-500 hover:text-red-800 font-bold px-4 py-2 hover:bg-red-50 rounded-lg transition"><div className="transform rotate-180"><ChevronRight size={20}/></div> 上一則</button>
+          <button onClick={markLearned} disabled={isLearned} className={`px-8 py-3 rounded-full shadow-md font-bold text-white transition transform active:scale-95 ${isLearned ? 'bg-gray-400 cursor-default' : 'bg-red-700 hover:bg-red-800'}`}>{isLearned ? '已完成學習' : '標記為已學'}</button>
+          <button onClick={() => setCurrentIndex((currentIndex + 1) % idioms.length)} className="flex items-center gap-2 text-gray-500 hover:text-red-800 font-bold px-4 py-2 hover:bg-red-50 rounded-lg transition">下一則 <ChevronRight size={20}/></button>
         </div>
       </div>
     </div>
@@ -302,14 +338,17 @@ const ReadingMode = ({ user, readingMaterials, refreshStats }) => {
 
   if (!selectedStory) {
     return (
-      <div className="max-w-4xl mx-auto my-10 px-4 animate-fade-in">
-        <h2 className="text-2xl font-bold text-gray-800 mb-6 border-l-4 border-red-800 pl-4">成語閱讀測驗列表</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="max-w-5xl mx-auto my-10 px-4 animate-fade-in">
+        <h2 className="text-2xl font-bold text-gray-800 mb-8 border-l-8 border-red-800 pl-4">成語閱讀測驗列表</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {readingMaterials.map((item, idx) => (
-            <div key={idx} className="bg-white p-6 rounded-xl shadow-md border border-gray-200 hover:shadow-lg transition">
-              <h3 className="text-xl font-bold text-red-800 mb-3">{item.title}</h3>
-              <p className="text-gray-500 text-sm mb-4 line-clamp-3">{item.content}</p>
-              <button onClick={() => { setSelectedStory(item); setCurrentQIndex(0); setScore(0); setFinished(false); setSelectedOption(null); setIsCorrect(null); }} className="w-full bg-red-800 text-white py-2 rounded font-bold hover:bg-red-900">閱讀並挑戰</button>
+            <div key={idx} className="bg-white p-8 rounded-2xl shadow-sm border border-gray-200 hover:shadow-xl transition group cursor-pointer" onClick={() => { setSelectedStory(item); setCurrentQIndex(0); setScore(0); setFinished(false); setSelectedOption(null); setIsCorrect(null); }}>
+              <div className="flex justify-between items-start mb-4">
+                <h3 className="text-2xl font-bold text-gray-800 group-hover:text-red-800 transition">{item.title}</h3>
+                <span className="bg-red-100 text-red-800 text-xs px-2 py-1 rounded-full">5 題</span>
+              </div>
+              <p className="text-gray-500 text-base mb-6 line-clamp-3 leading-relaxed">{item.content}</p>
+              <button className="w-full bg-gray-50 text-gray-600 py-3 rounded-xl font-bold group-hover:bg-red-800 group-hover:text-white transition">立即閱讀並挑戰</button>
             </div>
           ))}
         </div>
@@ -320,9 +359,9 @@ const ReadingMode = ({ user, readingMaterials, refreshStats }) => {
   if (finished) {
     return (
       <div className="max-w-lg mx-auto my-10 bg-white p-8 rounded-xl shadow-lg text-center border-t-8 border-red-800 animate-fade-in">
-        <Trophy className="w-20 h-20 mx-auto text-yellow-500 mb-4" /><h2 className="text-2xl font-bold text-gray-800">閱讀測驗結束</h2>
-        <p className="text-gray-500 mt-2">故事：{selectedStory.title}</p><p className="text-5xl font-bold text-red-700 my-6">{score} 分</p>
-        <button onClick={() => setSelectedStory(null)} className="bg-gray-600 text-white px-6 py-2 rounded hover:bg-gray-700">返回列表</button>
+        <Trophy className="w-24 h-24 mx-auto text-yellow-500 mb-6 drop-shadow-md" /><h2 className="text-3xl font-bold text-gray-800">測驗完成！</h2>
+        <p className="text-gray-500 mt-2 text-lg">故事：{selectedStory.title}</p><div className="bg-red-50 my-8 py-4 rounded-xl"><p className="text-6xl font-extrabold text-red-700">{score} <span className="text-xl font-medium text-gray-500">分</span></p></div>
+        <button onClick={() => setSelectedStory(null)} className="bg-gray-800 text-white px-8 py-3 rounded-full hover:bg-gray-900 shadow-lg transition">返回列表</button>
       </div>
     );
   }
@@ -350,19 +389,25 @@ const ReadingMode = ({ user, readingMaterials, refreshStats }) => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto my-8 px-4 flex flex-col md:flex-row gap-8 animate-fade-in">
-      <div className="flex-1 bg-white p-8 rounded-xl shadow-md border border-gray-200 h-fit"><h2 className="text-2xl font-bold text-red-800 mb-4 flex items-center gap-2"><Book size={24}/> {selectedStory.title}</h2><div className="text-gray-700 leading-relaxed whitespace-pre-wrap text-lg">{selectedStory.content}</div></div>
-      <div className="w-full md:w-96">
-        <div className="bg-white p-6 rounded-xl shadow-lg border-t-4 border-red-800 sticky top-24">
-          <div className="flex justify-between mb-4 text-gray-500 font-bold"><span>第 {currentQIndex + 1} / {selectedStory.questions.length} 題</span><span>得分: {score}</span></div>
-          {selectedOption && <div className={`mb-4 p-3 rounded text-center font-bold text-sm animate-bounce-in ${isCorrect ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>{isCorrect ? "答對了！" : `答錯了！答案是：${currentQ.answer}`}</div>}
-          <div className="font-bold text-gray-800 mb-6 text-lg">{currentQ.question}</div>
-          <div className="space-y-3">{currentQ.options.map((opt, i) => {
-               let btnClass = "w-full p-3 rounded-lg text-left border border-gray-200 hover:bg-gray-50 transition";
+    <div className="max-w-6xl mx-auto my-8 px-4 flex flex-col lg:flex-row gap-8 animate-fade-in h-[calc(100vh-120px)]">
+      <div className="flex-1 bg-white p-10 rounded-2xl shadow-md border border-gray-200 overflow-y-auto custom-scrollbar">
+        <button onClick={() => setSelectedStory(null)} className="mb-4 text-sm text-gray-500 hover:text-red-800 flex items-center gap-1"><ChevronRight className="transform rotate-180" size={14}/> 返回列表</button>
+        <h2 className="text-3xl font-bold text-gray-800 mb-6 flex items-center gap-3 border-b pb-4"><Book className="text-red-800" size={32}/> {selectedStory.title}</h2>
+        <div className="text-gray-700 leading-loose whitespace-pre-wrap text-lg font-serif">{selectedStory.content}</div>
+      </div>
+      <div className="w-full lg:w-[400px] flex-shrink-0">
+        <div className="bg-white p-8 rounded-2xl shadow-xl border-t-8 border-red-800 sticky top-4">
+          <div className="flex justify-between mb-6 text-gray-500 font-bold border-b pb-2"><span>Q{currentQIndex + 1} / {selectedStory.questions.length}</span><span className="text-red-600">得分: {score}</span></div>
+          {selectedOption && <div className={`mb-6 p-4 rounded-xl text-center font-bold text-lg animate-bounce-in shadow-inner ${isCorrect ? 'bg-green-100 text-green-800 border border-green-200' : 'bg-red-50 text-red-800 border border-red-200'}`}>{isCorrect ? <span className="flex items-center justify-center gap-2"><CheckCircle/> 答對了！</span> : <div className="flex flex-col items-center"><span className="flex items-center gap-2 mb-1"><XCircle/> 答錯了</span><span className="text-sm font-normal text-gray-600">答案：{currentQ.answer}</span></div>}</div>}
+          <div className="font-bold text-gray-800 mb-8 text-xl">{currentQ.question}</div>
+          <div className="space-y-4">{currentQ.options.map((opt, i) => {
+               let btnClass = "w-full p-4 rounded-xl text-left border-2 transition-all duration-200 font-medium";
                if (selectedOption) {
-                 if (opt === currentQ.answer) btnClass = "w-full p-3 rounded-lg text-left bg-green-100 border-green-500 text-green-800 font-bold";
-                 else if (opt === selectedOption) btnClass = "w-full p-3 rounded-lg text-left bg-red-100 border-red-500 text-red-800";
-                 else btnClass = "w-full p-3 rounded-lg text-left border border-gray-100 text-gray-400";
+                 if (opt === currentQ.answer) btnClass = "bg-green-50 border-green-500 text-green-800 shadow-md ring-1 ring-green-500";
+                 else if (opt === selectedOption) btnClass = "bg-red-50 border-red-500 text-red-800 opacity-60";
+                 else btnClass = "border-gray-100 text-gray-300 opacity-30";
+               } else {
+                 btnClass += " border-gray-100 hover:border-red-300 hover:bg-red-50 text-gray-700 hover:shadow-sm";
                }
                return <button key={i} onClick={() => handleAnswer(opt)} disabled={!!selectedOption} className={btnClass}>{opt}</button>
             })}</div>
@@ -411,113 +456,103 @@ const QuizMode = ({ user, idioms, refreshStats }) => {
   if (finished) return <div className="max-w-md mx-auto my-10 bg-white p-8 rounded-xl shadow-lg text-center border-t-8 border-red-800 animate-fade-in"><Trophy className="w-20 h-20 mx-auto text-yellow-500 mb-4" /><h2 className="text-2xl font-bold text-gray-800">測驗結束</h2><p className="text-5xl font-bold text-red-700 my-6">{score} 分</p><button onClick={start} className="bg-red-800 text-white px-6 py-2 rounded hover:bg-red-900">再玩一次</button></div>;
 
   if (playing && q) return (
-    <div className="max-w-2xl mx-auto my-10 bg-white p-6 rounded-xl shadow-lg border border-gray-200 animate-fade-in">
-      <div className="flex justify-between mb-4 text-gray-500 font-bold"><span>第 {count} / 5 題</span><span>得分: {score}</span></div>
-      {selectedOption && <div className={`mb-6 p-4 rounded-lg text-center font-bold animate-bounce-in shadow-inner ${isCorrect ? 'bg-green-100 text-green-800 border border-green-200' : 'bg-red-50 text-red-800 border border-red-200'}`}>{isCorrect ? <span className="flex items-center justify-center gap-2 text-lg"><CheckCircle size={24}/> 答對了！太棒了！</span> : <div className="flex flex-col items-center"><span className="flex items-center gap-2 mb-2 text-lg"><XCircle size={24}/> 哎呀，答錯了！</span><span className="text-sm bg-white px-3 py-1 rounded-full border border-red-200 shadow-sm text-gray-600">正確答案是：<span className="text-green-600 font-bold text-base ml-1">{q.word}</span></span></div>}</div>}
-      <div className="bg-gray-100 p-6 rounded-lg mb-6 text-lg text-gray-800 font-medium border-l-4 border-red-800 shadow-sm">"{q.meaning}"</div>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {q.options.map((opt, i) => {
-            let btnClass = "bg-white border-2 border-gray-200 text-gray-700 hover:border-red-500 hover:bg-red-50";
-            if (selectedOption) {
-                if (opt === q.word) btnClass = "bg-green-100 border-green-500 text-green-800 font-bold shadow-md transform scale-105 ring-2 ring-green-200";
-                else if (opt === selectedOption && !isCorrect) btnClass = "bg-red-100 border-red-500 text-red-800 opacity-90";
-                else btnClass = "bg-gray-50 border-gray-100 text-gray-400 opacity-40";
-            }
-            return <button key={i} onClick={() => handleAnswer(opt)} disabled={!!selectedOption} className={`p-4 rounded-lg text-left transition-all duration-300 relative overflow-hidden ${btnClass}`}>{opt}</button>
-        })}
+    <div className="max-w-3xl mx-auto my-16 px-4 animate-fade-in">
+      <div className="bg-white p-10 rounded-2xl shadow-xl border border-gray-200 relative">
+        <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-red-800 to-red-600 rounded-t-2xl"></div>
+        <div className="flex justify-between mb-8 text-gray-500 font-bold text-lg"><span>第 {count} / 5 題</span><span>得分: {score}</span></div>
+        
+        {selectedOption && <div className={`mb-8 p-4 rounded-xl text-center font-bold text-lg animate-bounce-in shadow-sm border ${isCorrect ? 'bg-green-50 text-green-700 border-green-200' : 'bg-red-50 text-red-700 border-red-200'}`}>{isCorrect ? "🎉 答對了！" : <span>❌ 答錯了，答案是 <span className="underline">{q.word}</span></span>}</div>}
+        
+        <div className="bg-gray-50 p-8 rounded-xl mb-10 text-2xl text-gray-800 font-medium text-center shadow-inner border border-gray-100">"{q.meaning}"</div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {q.options.map((opt, i) => {
+              let btnClass = "bg-white border-2 border-gray-100 text-gray-600 font-medium p-6 rounded-xl hover:border-red-300 hover:bg-red-50 hover:text-red-900 hover:shadow-md transition-all duration-200 text-lg";
+              if (selectedOption) {
+                  if (opt === q.word) btnClass = "bg-green-100 border-green-500 text-green-800 font-bold ring-2 ring-green-200";
+                  else if (opt === selectedOption && !isCorrect) btnClass = "bg-red-100 border-red-500 text-red-800 opacity-60";
+                  else btnClass = "bg-gray-50 border-gray-100 text-gray-300 opacity-30";
+              }
+              return <button key={i} onClick={() => handleAnswer(opt)} disabled={!!selectedOption} className={btnClass}>{opt}</button>
+          })}
+        </div>
       </div>
     </div>
   );
 
-  return <div className="max-w-2xl mx-auto my-16 text-center animate-fade-in"><div className="bg-white p-10 rounded-2xl shadow-xl border border-gray-200"><Brain className="w-20 h-20 mx-auto text-red-800 mb-6" /><h2 className="text-3xl font-bold text-gray-800 mb-4">成語大挑戰</h2><p className="text-gray-600 mb-8">準備好測試你的成語實力了嗎？每局 5 題，挑戰最高分！</p><button onClick={start} className="bg-red-800 text-white font-bold py-3 px-10 rounded-full shadow-lg hover:bg-red-900 transform transition hover:scale-105">開始測驗</button></div></div>;
+  return <div className="max-w-2xl mx-auto my-16 text-center animate-fade-in"><div className="bg-white p-12 rounded-3xl shadow-xl border border-gray-200"><Brain className="w-24 h-24 mx-auto text-red-800 mb-6" /><h2 className="text-4xl font-bold text-gray-800 mb-6">成語大挑戰</h2><p className="text-xl text-gray-500 mb-10">準備好測試你的成語實力了嗎？<br/>每局 5 題，挑戰最高分！</p><button onClick={start} className="bg-gradient-to-r from-red-800 to-red-700 text-white font-bold py-4 px-12 rounded-full shadow-lg hover:shadow-xl transform transition hover:-translate-y-1 text-lg">開始測驗</button></div></div>;
 };
 
-// 8. Admin Panel (Updated with Dual Import)
+// 8. Admin Panel (Fixed layout scrolling issue)
 const AdminPanel = ({ idioms, readingMaterials, refreshIdioms, refreshReading }) => {
-  const [importType, setImportType] = useState('idiom'); // 'idiom' | 'reading'
+  const [importType, setImportType] = useState('idiom'); 
   const [jsonMode, setJsonMode] = useState(false);
   const [jsonInput, setJsonInput] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const initIdioms = async () => {
-    if(!confirm('匯入預設成語題庫?')) return;
-    setLoading(true);
-    for (const i of INITIAL_IDIOMS) await addDoc(collection(db,'artifacts',appId,'public','data','idioms'), {...i, createdAt: serverTimestamp()});
-    setLoading(false); refreshIdioms();
-  };
-
-  const initReading = async () => {
-    if(!confirm('匯入預設閱讀測驗?')) return;
-    setLoading(true);
-    for (const i of INITIAL_READING_DATA) await addDoc(collection(db,'artifacts',appId,'public','data','reading_materials'), {...i, createdAt: serverTimestamp()});
-    setLoading(false); refreshReading();
-  };
-
-  const importJson = async () => {
-    try {
-      const data = JSON.parse(jsonInput);
-      if (!Array.isArray(data)) throw new Error("JSON 必須是陣列格式");
-      setLoading(true);
-      let count = 0;
-
-      if (importType === 'idiom') {
-        for (const item of data) {
-          if (!item.word) continue;
-          let opts = item.options;
-          if (!opts && item.distractors) opts = [item.word, ...item.distractors].sort(()=>Math.random()-0.5);
-          if (!opts || opts.length<4) continue;
-          await addDoc(collection(db,'artifacts',appId,'public','data','idioms'), {...item, options: opts, createdAt: serverTimestamp()});
-          count++;
-        }
-        refreshIdioms();
-      } else {
-        for (const item of data) {
-          if (!item.title || !item.content || !item.questions) continue;
-          await addDoc(collection(db,'artifacts',appId,'public','data','reading_materials'), {...item, createdAt: serverTimestamp()});
-          count++;
-        }
-        refreshReading();
-      }
-      alert(`成功匯入 ${count} 筆${importType==='idiom'?'成語':'閱讀測驗'}資料！`); setJsonInput('');
-    } catch(e) { alert('匯入錯誤：' + e.message); } finally { setLoading(false); }
-  };
-
+  const initIdioms = async () => { if(!confirm('匯入?')) return; setLoading(true); for (const i of INITIAL_IDIOMS) await addDoc(collection(db,'artifacts',appId,'public','data','idioms'), {...i, createdAt: serverTimestamp()}); setLoading(false); refreshIdioms(); };
+  const initReading = async () => { if(!confirm('匯入?')) return; setLoading(true); for (const i of INITIAL_READING_DATA) await addDoc(collection(db,'artifacts',appId,'public','data','reading_materials'), {...i, createdAt: serverTimestamp()}); setLoading(false); refreshReading(); };
+  const importJson = async () => { try { const data = JSON.parse(jsonInput); if (!Array.isArray(data)) throw new Error("Format error"); setLoading(true); let count = 0; if (importType === 'idiom') { for (const item of data) { if (!item.word) continue; let opts = item.options; if (!opts && item.distractors) opts = [item.word, ...item.distractors].sort(()=>Math.random()-0.5); if (!opts || opts.length<4) continue; await addDoc(collection(db,'artifacts',appId,'public','data','idioms'), {...item, options: opts, createdAt: serverTimestamp()}); count++; } refreshIdioms(); } else { for (const item of data) { if (!item.title) continue; await addDoc(collection(db,'artifacts',appId,'public','data','reading_materials'), {...item, createdAt: serverTimestamp()}); count++; } refreshReading(); } alert(`成功 ${count}`); setJsonInput(''); } catch(e) { alert('Error'); } finally { setLoading(false); } };
   const delIdiom = async (id) => { if(confirm('刪除?')) { await deleteDoc(doc(db,'artifacts',appId,'public','data','idioms',id)); refreshIdioms(); }};
   const delReading = async (id) => { if(confirm('刪除?')) { await deleteDoc(doc(db,'artifacts',appId,'public','data','reading_materials',id)); refreshReading(); }};
 
   return (
-    <div className="max-w-4xl mx-auto my-10 bg-white p-6 rounded shadow animate-fade-in">
-      <div className="flex justify-between mb-4">
-        <h2 className="font-bold text-xl">後台管理</h2>
-        <div className="flex gap-2">
-          {readingMaterials?.length === 0 && <button onClick={initReading} disabled={loading} className="bg-purple-600 text-white px-3 py-1 rounded text-sm">預設閱讀</button>}
-          {idioms.length === 0 && <button onClick={initIdioms} disabled={loading} className="bg-green-600 text-white px-3 py-1 rounded text-sm">預設成語</button>}
-          <button onClick={() => setJsonMode(!jsonMode)} className="bg-blue-600 text-white px-3 py-1 rounded text-sm">切換模式</button>
+    <div className="max-w-6xl mx-auto my-10 bg-white p-8 rounded-2xl shadow-lg animate-fade-in min-h-[600px]">
+      <div className="flex justify-between items-center mb-8 border-b pb-6">
+        <h2 className="font-bold text-2xl text-gray-800 flex items-center gap-2"><Settings className="text-gray-600"/> 後台管理系統</h2>
+        <div className="flex gap-3">
+          <div className="flex bg-gray-100 p-1 rounded-lg">
+             <button onClick={() => setImportType('idiom')} className={`px-4 py-1.5 rounded-md text-sm font-bold transition ${importType==='idiom' ? 'bg-white text-gray-800 shadow' : 'text-gray-500'}`}>成語</button>
+             <button onClick={() => setImportType('reading')} className={`px-4 py-1.5 rounded-md text-sm font-bold transition ${importType==='reading' ? 'bg-white text-gray-800 shadow' : 'text-gray-500'}`}>閱讀</button>
+          </div>
+          <button onClick={() => setJsonMode(!jsonMode)} className="bg-gray-800 text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-gray-900 transition flex items-center gap-2">{jsonMode ? <List size={16}/> : <FileJson size={16}/>} 切換視圖</button>
         </div>
       </div>
       
       {jsonMode ? (
-        <div>
-          <div className="flex gap-4 mb-4 bg-gray-100 p-3 rounded-lg">
-            <label className="flex items-center gap-2 cursor-pointer font-bold text-gray-700">
-              <input type="radio" checked={importType === 'idiom'} onChange={() => setImportType('idiom')} className="w-4 h-4 text-red-600" /> 成語資料庫
-            </label>
-            <label className="flex items-center gap-2 cursor-pointer font-bold text-gray-700">
-              <input type="radio" checked={importType === 'reading'} onChange={() => setImportType('reading')} className="w-4 h-4 text-red-600" /> 閱讀測驗題庫
-            </label>
+        <div className="animate-fade-in">
+          <div className="mb-4 bg-blue-50 text-blue-700 p-4 rounded-lg text-sm border border-blue-100">
+            <strong>正在匯入：{importType === 'idiom' ? '成語資料' : '閱讀測驗'}</strong>
+            <p className="mt-1 opacity-80">請貼上符合格式的 JSON 陣列資料。</p>
           </div>
-          <textarea className="w-full border p-2 h-40 text-xs font-mono" value={jsonInput} onChange={e=>setJsonInput(e.target.value)} placeholder={importType === 'idiom' ? '[{"word":"..."},...]' : '[{"title":"...","content":"...","questions":[]},...]'} />
-          <button onClick={importJson} disabled={loading} className="bg-indigo-600 text-white px-4 py-2 rounded mt-2">{loading?'...':'開始匯入'}</button>
+          <textarea className="w-full border border-gray-300 p-4 h-96 text-sm font-mono rounded-xl focus:ring-2 focus:ring-blue-500 outline-none" value={jsonInput} onChange={e=>setJsonInput(e.target.value)} placeholder={importType === 'idiom' ? '[{"word":"...", ...}]' : '[{"title":"...", ...}]'} />
+          <div className="flex justify-end gap-3 mt-4">
+             {importType === 'idiom' && idioms.length === 0 && <button onClick={initIdioms} disabled={loading} className="text-green-600 font-bold px-4 py-2 text-sm hover:underline">匯入預設成語</button>}
+             {importType === 'reading' && readingMaterials?.length === 0 && <button onClick={initReading} disabled={loading} className="text-purple-600 font-bold px-4 py-2 text-sm hover:underline">匯入預設閱讀</button>}
+             <button onClick={importJson} disabled={loading} className="bg-blue-600 text-white px-8 py-2.5 rounded-lg font-bold hover:bg-blue-700 transition shadow-md">{loading?'處理中...':'確認匯入'}</button>
+          </div>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 h-96">
-          <div className="border rounded p-2 bg-gray-50 flex flex-col">
-            <h3 className="font-bold text-gray-700 mb-2 border-b pb-1">成語列表 ({idioms.length})</h3>
-            <div className="overflow-y-auto flex-1">{idioms.map(i => <div key={i.id} className="flex justify-between items-center p-2 border-b bg-white text-sm"><span>{i.word}</span><button onClick={()=>delIdiom(i.id)} className="text-red-500"><Trash2 size={14}/></button></div>)}</div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 animate-fade-in">
+          <div className="flex flex-col border border-gray-200 rounded-xl overflow-hidden shadow-sm h-full">
+            <h3 className="font-bold text-gray-700 bg-gray-50 p-4 border-b flex justify-between items-center">
+              <span>成語庫 ({idioms.length})</span>
+              <span className="text-xs bg-white border px-2 py-1 rounded text-gray-500">word</span>
+            </h3>
+            <div className="p-2 space-y-1 bg-white">
+              {idioms.map(i => (
+                <div key={i.id} className="flex justify-between items-center p-3 hover:bg-gray-50 rounded-lg group border border-transparent hover:border-gray-100 transition">
+                  <span className="font-medium text-gray-800">{i.word}</span>
+                  <button onClick={()=>delIdiom(i.id)} className="text-gray-300 hover:text-red-500 transition p-1"><Trash2 size={16}/></button>
+                </div>
+              ))}
+              {idioms.length === 0 && <div className="p-4 flex items-center justify-center text-gray-400 text-sm">無資料</div>}
+            </div>
           </div>
-          <div className="border rounded p-2 bg-gray-50 flex flex-col">
-            <h3 className="font-bold text-gray-700 mb-2 border-b pb-1">閱讀測驗列表 ({readingMaterials?.length || 0})</h3>
-            <div className="overflow-y-auto flex-1">{readingMaterials?.map(i => <div key={i.id} className="flex justify-between items-center p-2 border-b bg-white text-sm"><span className="truncate w-32">{i.title}</span><button onClick={()=>delReading(i.id)} className="text-red-500"><Trash2 size={14}/></button></div>)}</div>
+          <div className="flex flex-col border border-gray-200 rounded-xl overflow-hidden shadow-sm h-full">
+            <h3 className="font-bold text-gray-700 bg-gray-50 p-4 border-b flex justify-between items-center">
+              <span>閱讀測驗庫 ({readingMaterials?.length || 0})</span>
+              <span className="text-xs bg-white border px-2 py-1 rounded text-gray-500">title</span>
+            </h3>
+            <div className="p-2 space-y-1 bg-white">
+              {readingMaterials?.map(i => (
+                <div key={i.id} className="flex justify-between items-center p-3 hover:bg-gray-50 rounded-lg group border border-transparent hover:border-gray-100 transition">
+                  <span className="font-medium text-gray-800 truncate max-w-[200px]">{i.title}</span>
+                  <button onClick={()=>delReading(i.id)} className="text-gray-300 hover:text-red-500 transition p-1"><Trash2 size={16}/></button>
+                </div>
+              ))}
+              {(!readingMaterials || readingMaterials.length === 0) && <div className="p-4 flex items-center justify-center text-gray-400 text-sm">無資料</div>}
+            </div>
           </div>
         </div>
       )}
@@ -525,7 +560,7 @@ const AdminPanel = ({ idioms, readingMaterials, refreshIdioms, refreshReading })
   );
 };
 
-// --- Main App Component ---
+// --- Main App ---
 export default function App() {
   const [user, setUser] = useState(null);
   const [view, setView] = useState('home'); 
