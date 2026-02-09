@@ -112,10 +112,10 @@ const Dashboard = ({ user, userStats, idioms, navigateTo }) => {
   const learnedCount = userStats.learnedCount || 0;
   const learnedPct = Math.min(100, Math.round((learnedCount / totalIdioms) * 100));
   const totalScore = userStats.totalScore || 0;
-  const scoreGoal = 1000;
+  const scoreGoal = 2000;
   const scorePct = Math.min(100, Math.round((totalScore / scoreGoal) * 100));
   const readingScore = userStats.readingScore || 0;
-  const readingGoal = 1000;
+  const readingGoal = 3000;
   const readingPct = Math.min(100, Math.round((readingScore / readingGoal) * 100));
 
   return (
