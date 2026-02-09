@@ -115,7 +115,7 @@ const Dashboard = ({ user, userStats, idioms, navigateTo }) => {
   const scoreGoal = 1000;
   const scorePct = Math.min(100, Math.round((totalScore / scoreGoal) * 100));
   const readingScore = userStats.readingScore || 0;
-  const readingGoal = 500;
+  const readingGoal = 1000;
   const readingPct = Math.min(100, Math.round((readingScore / readingGoal) * 100));
 
   return (
